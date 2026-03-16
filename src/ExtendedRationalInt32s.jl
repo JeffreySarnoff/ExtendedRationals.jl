@@ -66,13 +66,20 @@ end
 
 const ℚx32 = ExtendedRational32
 
-NaN(::Type{ExtendedRational32}) = ExtendedRational32(0, 0)
-Inf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
-NegInf(::Type{ExtendedRational32}) = ExtendedRational32(-1, 0)
+Base.NaN(::Type{ExtendedRationals.ExtendedRationalInt32s.ExtendedRational32}) = Qx32(0, 0)
+Base.Inf(::Type{ExtendedRationals.ExtendedRationalInt32s.ExtendedRational32}) = Qx32(1, 0)
+NegInf(::Type{ExtendedRationals.ExtendedRationalInt32s.ExtendedRational32}) = Qx32(-1, 0)
 
 ExtendedRational32(n::Integer) = ExtendedRational32(n, 1)
 ExtendedRational32(x::Rational32) = ExtendedRational32(x.num, x.den)
 ExtendedRational32(x::Rational{<:Integer}) = ExtendedRational32(numerator(x), denominator(x))
+
+function ExtendedRational32(x <: AbstractFloat)
+    isnan(x) && return Qx32(0, 0)
+    isinf(x) && return x > 0 ? Qx32(1, 0) : Qx32(-1, 0)
+    r = rationalize(Int32, x)
+    Qx32(r.num, r.den)
+end
 
 #===
 Predicates and basic properties

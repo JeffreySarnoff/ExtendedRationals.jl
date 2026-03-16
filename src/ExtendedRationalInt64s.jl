@@ -66,13 +66,20 @@ end
 
 const ℚx64 = ExtendedRational64
 
-NaN(::Type{ExtendedRational64}) = ExtendedRational64(0, 0)
-Inf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
-NegInf(::Type{ExtendedRational64}) = ExtendedRational64(-1, 0)
+Base.NaN(::Type{ExtendedRationals.ExtendedRationalInt64s.ExtendedRational64}) = Qx64(0, 0)
+Base.Inf(::Type{ExtendedRationals.ExtendedRationalInt64s.ExtendedRational64}) = Qx64(1, 0)
+NegInf(::Type{ExtendedRationals.ExtendedRationalInt64s.ExtendedRational64}) = Qx64(-1, 0)
 
 ExtendedRational64(n::Integer) = ExtendedRational64(n, 1)
 ExtendedRational64(x::Rational64) = ExtendedRational64(x.num, x.den)
 ExtendedRational64(x::Rational{<:Integer}) = ExtendedRational64(numerator(x), denominator(x))
+
+function ExtendedRational64(x <: AbstractFloat)
+    isnan(x) && return Qx64(0, 0)
+    isinf(x) && return x > 0 ? Qx64(1, 0) : Qx64(-1, 0)
+    r = rationalize(Int64, x)
+    Qx64(r.num, r.den)
+end
 
 #===
 Predicates and basic properties
