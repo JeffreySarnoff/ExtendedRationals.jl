@@ -57,7 +57,7 @@ end
     @test isnan(ExtendedRational32(0, 1) / ExtendedRational32(0, 1))
 end
 
-@testset "ExtendedRational32 ordering and overflow" begin
+@testset "ExtendedRational32 ordering and overflow policy" begin
     ninf = ExtendedRational32(-1, 0)
     pinf = ExtendedRational32(1, 0)
     qnan = ExtendedRational32(0, 0)
@@ -70,7 +70,17 @@ end
     @test ninf <= ninf
     @test pinf >= one
 
-    @test_throws OverflowError ExtendedRational32(typemax(Int32), 1) + ExtendedRational32(1, 1)
+    @test ExtendedRational32(typemax(Int32), 1) + ExtendedRational32(1, 1) == pinf
+    @test ExtendedRational32(typemin(Int32), 1) - ExtendedRational32(1, 1) == ninf
+
+    ca = ExtendedRational32(387, 178085)
+    cb = ExtendedRational32(203, 103382)
+    @test ca + cb == pinf
+
+    @test ExtendedRational32(1, typemax(Int32)) * ExtendedRational32(1, typemax(Int32)) == pinf
+    @test ExtendedRational32(-1, typemax(Int32)) * ExtendedRational32(1, typemax(Int32)) == ninf
+    @test ExtendedRational32(typemax(Int32), 1) / ExtendedRational32(1, typemax(Int32)) == pinf
+    @test ExtendedRational32(typemin(Int32), 1) / ExtendedRational32(1, typemax(Int32)) == ninf
 end
 
 @testset "ExtendedRational32 rational-valued functions" begin

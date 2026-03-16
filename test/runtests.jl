@@ -1,6 +1,5 @@
 using ExtendedRationals
 using Test
-using Aqua
 
 include("RationalInt32s_tests.jl")
 include("ExtendedRationalInt32s_tests.jl")

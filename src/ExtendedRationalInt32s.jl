@@ -25,7 +25,7 @@ Finite values are stored canonically:
 - zero is stored as `0//1`
 
 Arithmetic on finite values is exact when the result fits in `Int32`; otherwise
-an `OverflowError` is thrown.
+a policy value is returned: `Inf32`, `-Inf32`, or `NaN32` as appropriate.
 """
 struct ExtendedRational32 <: Real
     num::Int32
@@ -124,6 +124,40 @@ end
 
 @inline _from_canonical32(num::Int32, den::Int32) = ExtendedRational32(num, den, Val(:canonical))
 
+@inline function _overflow_policy32(num::Integer, den::Integer)
+    if den == 0
+        return num == 0 ? nan(ExtendedRational32) : ExtendedRational32(sign(num), 0)
+    end
+    if den < 0
+        num = -num
+        den = -den
+    end
+    return num == 0 ? zero(ExtendedRational32) : ExtendedRational32(sign(num), 0)
+end
+
+@inline function _normalize_or_policy32(num::Integer, den::Integer)
+    try
+        nn, dd = _normalize32(num, den)
+        return _from_canonical32(nn, dd)
+    catch err
+        if err isa OverflowError
+            return _overflow_policy32(num, den)
+        end
+        rethrow()
+    end
+end
+
+@inline function _canonical_or_policy32(num::Integer, den::Integer)
+    try
+        return _from_canonical32(_checked_int32(num), _checked_int32(den))
+    catch err
+        if err isa OverflowError
+            return _overflow_policy32(num, den)
+        end
+        rethrow()
+    end
+end
+
 # Convert finite extended values to the finite Rational32 kernel.
 @inline _finite32(x::ExtendedRational32) = Rational32(x.num, x.den)
 # Return sign as -1, 0, or 1 for finite and special values.
@@ -182,8 +216,7 @@ function Base.:+(x::ExtendedRational32, y::ExtendedRational32)
     if x.den != 0 && y.den != 0
         n = Int64(x.num) * Int64(y.den) + Int64(y.num) * Int64(x.den)
         d = Int64(x.den) * Int64(y.den)
-        nn, dd = _normalize32(n, d)
-        return _from_canonical32(nn, dd)
+        return _normalize_or_policy32(n, d)
     elseif isnan(x) || isnan(y)
         return nan(ExtendedRational32)
     elseif isinf(x) || isinf(y)
@@ -195,8 +228,7 @@ end
     if x.den != 0 && y.den != 0
         n = Int64(x.num) * Int64(y.den) - Int64(y.num) * Int64(x.den)
         d = Int64(x.den) * Int64(y.den)
-        nn, dd = _normalize32(n, d)
-        return _from_canonical32(nn, dd)
+        return _normalize_or_policy32(n, d)
     elseif isnan(x) || isnan(y)
         return nan(ExtendedRational32)
     elseif isinf(x)
@@ -221,7 +253,7 @@ end
         n == 0 && return _from_canonical32(Int32(0), Int32(1))
 
         d = d1 * d2
-        return _from_canonical32(_checked_int32(n), _checked_int32(d))
+        return _canonical_or_policy32(n, d)
     elseif (x.den == 0 && x.num == 0) || (y.den == 0 && y.num == 0)
         return nan(ExtendedRational32)
     elseif (x.den == 0 && x.num != 0 && y.den != 0 && y.num == 0) ||
@@ -251,7 +283,7 @@ function Base.:/(x::ExtendedRational32, y::ExtendedRational32)
             d = -d
         end
 
-        return _from_canonical32(_checked_int32(n), _checked_int32(d))
+        return _canonical_or_policy32(n, d)
     elseif isnan(x) || isnan(y)
         return nan(ExtendedRational32)
     elseif isinf(x) && isinf(y)
