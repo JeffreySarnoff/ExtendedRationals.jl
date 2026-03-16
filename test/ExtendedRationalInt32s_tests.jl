@@ -7,6 +7,15 @@ using .ExtendedRationalInt32s
     x = ExtendedRational32(6, -8)
     @test x == ExtendedRational32(-3, 4)
 
+    @test isnan(ExtendedRationalInt32s.NaN(ExtendedRational32))
+    @test numerator(ExtendedRationalInt32s.NaN(ExtendedRational32)) == 0
+    @test denominator(ExtendedRationalInt32s.NaN(ExtendedRational32)) == 0
+    @test ExtendedRationalInt32s.Inf(ExtendedRational32) == ExtendedRational32(1, 0)
+    @test isinf(ExtendedRationalInt32s.Inf(ExtendedRational32))
+    @test ExtendedRationalInt32s.NegInf(ExtendedRational32) == ExtendedRational32(-1, 0)
+    @test isinf(ExtendedRationalInt32s.NegInf(ExtendedRational32))
+    @test signbit(ExtendedRationalInt32s.NegInf(ExtendedRational32))
+
     z = ExtendedRational32(0, 99)
     @test z == ExtendedRational32(0, 1)
     @test iszero(z)

@@ -192,9 +192,9 @@ Base.convert(::Type{ExtendedRational32}, x::ExtendedRational32) = x
 Base.convert(::Type{ExtendedRational32}, x::Integer) = ExtendedRational32(x)
 Base.convert(::Type{ExtendedRational32}, x::Rational32) = ExtendedRational32(x)
 Base.convert(::Type{ExtendedRational32}, x::Rational{<:Integer}) = ExtendedRational32(x)
-Base.convert(::Type{Float64}, x::ExtendedRational32) = isnan(x) ? NaN : isinf(x) ? (x.num > 0 ? Inf : -Inf) : Float64(x.num) / Float64(x.den)
-Base.convert(::Type{Float32}, x::ExtendedRational32) = isnan(x) ? Float32(NaN) : isinf(x) ? (x.num > 0 ? Float32(Inf) : Float32(-Inf)) : Float32(x.num) / Float32(x.den)
-Base.convert(::Type{BigFloat}, x::ExtendedRational32) = isnan(x) ? BigFloat(NaN) : isinf(x) ? (x.num > 0 ? BigFloat(Inf) : BigFloat(-Inf)) : BigFloat(x.num) / BigFloat(x.den)
+Base.convert(::Type{Float64}, x::ExtendedRational32) = isnan(x) ? Base.NaN : isinf(x) ? (x.num > 0 ? Base.Inf : -Base.Inf) : Float64(x.num) / Float64(x.den)
+Base.convert(::Type{Float32}, x::ExtendedRational32) = isnan(x) ? Float32(Base.NaN) : isinf(x) ? (x.num > 0 ? Float32(Base.Inf) : Float32(-Base.Inf)) : Float32(x.num) / Float32(x.den)
+Base.convert(::Type{BigFloat}, x::ExtendedRational32) = isnan(x) ? BigFloat(Base.NaN) : isinf(x) ? (x.num > 0 ? BigFloat(Base.Inf) : BigFloat(-Base.Inf)) : BigFloat(x.num) / BigFloat(x.den)
 Base.convert(::Type{Rational32}, x::ExtendedRational32) = isfinite(x) ? Rational32(x.num, x.den) : throw(InexactError(:convert, Rational32, x))
 Base.convert(::Type{Rational{Int32}}, x::ExtendedRational32) = isfinite(x) ? (x.num // x.den) : throw(InexactError(:convert, Rational{Int32}, x))
 

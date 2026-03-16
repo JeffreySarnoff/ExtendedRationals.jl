@@ -7,6 +7,15 @@ using .ExtendedRationalInt64s
     x = ExtendedRational64(6, -8)
     @test x == ExtendedRational64(-3, 4)
 
+    @test isnan(ExtendedRationalInt64s.NaN(ExtendedRational64))
+    @test numerator(ExtendedRationalInt64s.NaN(ExtendedRational64)) == 0
+    @test denominator(ExtendedRationalInt64s.NaN(ExtendedRational64)) == 0
+    @test ExtendedRationalInt64s.Inf(ExtendedRational64) == ExtendedRational64(1, 0)
+    @test isinf(ExtendedRationalInt64s.Inf(ExtendedRational64))
+    @test ExtendedRationalInt64s.NegInf(ExtendedRational64) == ExtendedRational64(-1, 0)
+    @test isinf(ExtendedRationalInt64s.NegInf(ExtendedRational64))
+    @test signbit(ExtendedRationalInt64s.NegInf(ExtendedRational64))
+
     z = ExtendedRational64(0, 99)
     @test z == ExtendedRational64(0, 1)
     @test iszero(z)
