@@ -66,9 +66,9 @@ end
 
 const ℚx64 = ExtendedRational64
 
-Base.NaN(::Type{ExtendedRationals.ExtendedRationalInt64s.ExtendedRational64}) = Qx64(0, 0)
-Base.Inf(::Type{ExtendedRationals.ExtendedRationalInt64s.ExtendedRational64}) = Qx64(1, 0)
-NegInf(::Type{ExtendedRationals.ExtendedRationalInt64s.ExtendedRational64}) = Qx64(-1, 0)
+Base.NaN(::Type{ExtendedRational64}) = Qx64(0, 0)
+Base.Inf(::Type{ExtendedRational64}) = Qx64(1, 0)
+NegInf(::Type{ExtendedRational64}) = Qx64(-1, 0)
 
 ExtendedRational64(n::Integer) = ExtendedRational64(n, 1)
 ExtendedRational64(x::Rational64) = ExtendedRational64(x.num, x.den)
