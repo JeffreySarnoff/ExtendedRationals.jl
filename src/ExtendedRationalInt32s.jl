@@ -1,5 +1,7 @@
 module ExtendedRationalInt32s
 
+using Base: NaN, Inf
+
 include("RationalInt32s.jl")
 using .RationalInt32s: Rational32
 
@@ -65,6 +67,10 @@ struct ExtendedRational32 <: Real
 end
 
 const ℚx32 = ExtendedRational32
+
+Base.NaN(::Type{ExtendedRational32}) = ExtendedRational32(0, 0)
+Base.Inf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
+NegInf(::Type{ExtendedRational32}) = ExtendedRational32(-1, 0)
 
 ExtendedRational32(n::Integer) = ExtendedRational32(n, 1)
 ExtendedRational32(x::Rational32) = ExtendedRational32(x.num, x.den)

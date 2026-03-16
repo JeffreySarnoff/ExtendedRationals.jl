@@ -1,6 +1,6 @@
 module ExtendedRationals
 
-export Qx32, Q32
+export Qx32, Q32, NaN, Inf, NegInf
 
 include("ExtendedRationalInt32s.jl")
 
