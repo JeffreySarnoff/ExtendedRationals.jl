@@ -1,0 +1,4 @@
+[deps]
+ExtendedRationals = "f354a88b-0804-406d-a35b-636616acac82"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
