@@ -102,6 +102,7 @@ Base.numerator(x::ExtendedRational64) = x.num
 Base.denominator(x::ExtendedRational64) = x.den
 
 nan(::Type{ExtendedRational64}) = ExtendedRational64(0, 0)
+inf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
 posinf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
 neginf(::Type{ExtendedRational64}) = ExtendedRational64(-1, 0)
 

@@ -102,6 +102,7 @@ Base.numerator(x::ExtendedRational32) = x.num
 Base.denominator(x::ExtendedRational32) = x.den
 
 nan(::Type{ExtendedRational32}) = ExtendedRational32(0, 0)
+inf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
 posinf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
 neginf(::Type{ExtendedRational32}) = ExtendedRational32(-1, 0)
 
