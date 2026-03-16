@@ -1,6 +1,6 @@
 using Test
 
-include("ExtendedRationalInt32s.jl")
+include("../src/ExtendedRationalInt32s.jl")
 using .ExtendedRationalInt32s
 
 @testset "ExtendedRational32 constructors and predicates" begin

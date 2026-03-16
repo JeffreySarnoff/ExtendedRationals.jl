@@ -1,6 +1,6 @@
 using Test
 
-include("RationalInt32s.jl")
+include("../src/RationalInt32s.jl")
 using .RationalInt32s
 
 @testset "Rational32 rational-valued functions" begin
