@@ -1,6 +1,5 @@
 module ExtendedRationals
 
-# Export public API here
-# export ...
+include("ExendedRationalInt32.jl") 
 
 end # module ExtendedRationals
