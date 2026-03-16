@@ -64,7 +64,7 @@ struct ExtendedRational32 <: Real
     end
 end
 
-const ℚx32 = ExtendedRational32
+# const ℚx32 = ExtendedRational32
 
 ExtendedRational32(n::Integer) = ExtendedRational32(n, 1)
 ExtendedRational32(x::Rational32) = ExtendedRational32(x.num, x.den)

@@ -64,7 +64,7 @@ struct ExtendedRational64 <: Real
     end
 end
 
-const ℚx64 = ExtendedRational64
+# const ℚx64 = ExtendedRational64
 
 ExtendedRational64(n::Integer) = ExtendedRational64(n, 1)
 ExtendedRational64(x::Rational64) = ExtendedRational64(x.num, x.den)
