@@ -40,6 +40,7 @@ end
 @testset "ExtendedRational64 arithmetic" begin
     a = ExtendedRational64(2, 3)
     b = ExtendedRational64(5, 7)
+    int64min = typemin(Int64)
 
     @test a + b == ExtendedRational64(29, 21)
     @test a - b == ExtendedRational64(-1, 21)
@@ -55,6 +56,10 @@ end
     @test isnan(ExtendedRational64(1, 0) * ExtendedRational64(0, 1))
     @test ExtendedRational64(1, 2) / ExtendedRational64(0, 1) == ExtendedRational64(1, 0)
     @test isnan(ExtendedRational64(0, 1) / ExtendedRational64(0, 1))
+    @test ExtendedRational64(int64min, 1) * ExtendedRational64(1, 1) == ExtendedRational64(int64min, 1)
+    @test ExtendedRational64(int64min, 1) / ExtendedRational64(1, 1) == ExtendedRational64(int64min, 1)
+    @test -ExtendedRational64(int64min, 1) == ExtendedRational64(1, 0)
+    @test abs(ExtendedRational64(int64min, 1)) == ExtendedRational64(1, 0)
 end
 
 @testset "ExtendedRational64 ordering and overflow policy" begin

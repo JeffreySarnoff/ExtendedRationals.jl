@@ -65,8 +65,6 @@ struct ExtendedRational64 <: Real
 end
 
 const ℚx64 = ExtendedRational64
-NaN(::Type{ExtendedRational64}) = ExtendedRational64(0, 0)
-Inf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
 NegInf(::Type{ExtendedRational64}) = ExtendedRational64(-1, 0)
 
 ExtendedRational64(n::Integer) = ExtendedRational64(n, 1)
@@ -166,6 +164,18 @@ end
 @inline _both_finite(x::ExtendedRational64, y::ExtendedRational64) = x.den != 0 && y.den != 0
 @inline _finite_nonzero_divisor(x::ExtendedRational64, y::ExtendedRational64) = x.den != 0 && y.den != 0 && y.num != 0
 @inline _invalid_divisor_args(x::ExtendedRational64, y::ExtendedRational64) = isnan(x) || isnan(y) || isinf(x) || isinf(y) || iszero(y)
+@inline _abs128(x::Int64) = abs(Int128(x))
+
+@inline function _negate_or_policy64(x::ExtendedRational64)
+    if isnan(x)
+        return x
+    elseif isinf(x)
+        return ExtendedRational64(-x.num, 0)
+    elseif x.num == typemin(Int64)
+        return posinf(ExtendedRational64)
+    end
+    return _from_canonical64(-x.num, x.den)
+end
 
 #===
 Display
@@ -203,8 +213,8 @@ Base.promote_rule(::Type{ExtendedRational64}, ::Type{ExtendedRational64}) = Exte
 Unary operations
 ===#
 
-Base.abs(x::ExtendedRational64) = isnan(x) ? x : isinf(x) ? posinf(ExtendedRational64) : ExtendedRational64(abs(x.num), x.den)
-Base.:-(x::ExtendedRational64) = isnan(x) ? x : ExtendedRational64(-BigInt(x.num), x.den)
+Base.abs(x::ExtendedRational64) = isnan(x) ? x : isinf(x) ? posinf(ExtendedRational64) : signbit(x) ? -x : x
+Base.:-(x::ExtendedRational64) = _negate_or_policy64(x)
 Base.inv(x::ExtendedRational64) = isnan(x) ? x : isinf(x) ? zero(ExtendedRational64) : iszero(x) ? posinf(ExtendedRational64) : ExtendedRational64(x.den, x.num)
 Base.copysign(x::ExtendedRational64, y::Real) = isnan(x) ? x : (signbit(x) == signbit(y) ? x : -x)
 Base.flipsign(x::ExtendedRational64, y::Real) = isnan(x) ? x : (signbit(y) ? -x : x)
@@ -215,8 +225,8 @@ Arithmetic
 
 function Base.:+(x::ExtendedRational64, y::ExtendedRational64)
     if x.den != 0 && y.den != 0
-        n = BigInt(x.num) * BigInt(y.den) + BigInt(y.num) * BigInt(x.den)
-        d = BigInt(x.den) * BigInt(y.den)
+        n = Int128(x.num) * Int128(y.den) + Int128(y.num) * Int128(x.den)
+        d = Int128(x.den) * Int128(y.den)
         return _normalize_or_policy64(n, d)
     elseif isnan(x) || isnan(y)
         return nan(ExtendedRational64)
@@ -227,8 +237,8 @@ end
 
 @inline function Base.:-(x::ExtendedRational64, y::ExtendedRational64)
     if x.den != 0 && y.den != 0
-        n = BigInt(x.num) * BigInt(y.den) - BigInt(y.num) * BigInt(x.den)
-        d = BigInt(x.den) * BigInt(y.den)
+        n = Int128(x.num) * Int128(y.den) - Int128(y.num) * Int128(x.den)
+        d = Int128(x.den) * Int128(y.den)
         return _normalize_or_policy64(n, d)
     elseif isnan(x) || isnan(y)
         return nan(ExtendedRational64)
@@ -241,8 +251,8 @@ end
 
 @inline function Base.:*(x::ExtendedRational64, y::ExtendedRational64)
     if x.den != 0 && y.den != 0
-        g1 = gcd(abs(x.num), y.den)
-        g2 = gcd(abs(y.num), x.den)
+        g1 = gcd(_abs128(x.num), Int128(y.den))
+        g2 = gcd(_abs128(y.num), Int128(x.den))
 
         n1 = div(x.num, g1)
         d2 = div(y.den, g1)
@@ -266,8 +276,8 @@ end
 
 function Base.:/(x::ExtendedRational64, y::ExtendedRational64)
     if x.den != 0 && y.den != 0 && y.num != 0
-        g1 = gcd(abs(x.num), abs(y.num))
-        g2 = gcd(x.den, y.den)
+        g1 = gcd(_abs128(x.num), _abs128(y.num))
+        g2 = gcd(Int128(x.den), Int128(y.den))
 
         n1 = div(x.num, g1)
         d2 = div(y.num, g1)
