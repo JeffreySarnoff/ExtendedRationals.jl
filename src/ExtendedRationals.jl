@@ -2,6 +2,8 @@ module ExtendedRationals
 
 export Qx32, Q32, Qx64, Q64
 
+import Base: convert, promote, promote_type
+
 include("ExtendedRationalInt32s.jl")
 include("ExtendedRationalInt64s.jl")
 
@@ -27,6 +29,14 @@ function Qx32(x::Qx64)
     return Qx32(nearest)
 end
 
-Base.convert(::Type{Qx32}, x::Qx64) = Qx32(x)
+Base.convert(::Type{Qx32}, x::Qx64) = Qx32(x.num, x.den)
+Base.convert(::Type{Qx64}, x::Qx32) = Qx64(x.num, x.den)
+
+Base.convert(::Type{Qx32}, x::Rational{I}) where {I<Integer} = Qx32(x.num, x.den)
+Base.convert(::Type{Qx64}, x::Rational{I}) where {I<Integer} = Qx64(x.num, x.den)
+
+Base.promote_type(::Type{Qx32}, ::Type{Qx64}) = Qx64
+Base.promote_type(::Type{Qx32}, ::Type{Rational}) = Qx32
+Base.promote_type(::Type{Qx64}, ::Type{Rational}) = Qx64
 
 end # module ExtendedRationals
