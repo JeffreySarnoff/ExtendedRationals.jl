@@ -31,7 +31,4 @@ end
 
 Base.convert(::Type{Qx32}, x::Qx64) = Qx32(x)
 
-NegInf(::Type{Qx32}) = ExtendedRationalInt32s.NegInf(Qx32)
-NegInf(::Type{Qx64}) = ExtendedRationalInt64s.NegInf(Qx64)
-
 end # module ExtendedRationals
