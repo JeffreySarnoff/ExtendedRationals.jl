@@ -1,5 +1,5 @@
 module ExtendedRationals
 
-include("ExendedRationalInt32.jl") 
+include("ExendedRationalInts32.jl") 
 
 end # module ExtendedRationals
