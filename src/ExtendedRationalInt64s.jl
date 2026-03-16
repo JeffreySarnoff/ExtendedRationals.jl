@@ -70,7 +70,7 @@ ExtendedRational64(n::Integer) = ExtendedRational64(n, 1)
 ExtendedRational64(x::Rational64) = ExtendedRational64(x.num, x.den)
 ExtendedRational64(x::Rational{<:Integer}) = ExtendedRational64(numerator(x), denominator(x))
 
-function ExtendedRational64(x <: AbstractFloat)
+function ExtendedRational64(x::AbstractFloat)
     isnan(x) && return Qx64(0, 0)
     isinf(x) && return x > 0 ? Qx64(1, 0) : Qx64(-1, 0)
     r = rationalize(Int64, x)
