@@ -71,10 +71,10 @@ ExtendedRational64(x::Rational64) = ExtendedRational64(x.num, x.den)
 ExtendedRational64(x::Rational{<:Integer}) = ExtendedRational64(numerator(x), denominator(x))
 
 function ExtendedRational64(x::AbstractFloat)
-    isnan(x) && return Qx64(0, 0)
-    isinf(x) && return x > 0 ? Qx64(1, 0) : Qx64(-1, 0)
+    isnan(x) && return ExtendedRational64(0, 0)
+    isinf(x) && return x > 0 ? ExtendedRational64(1, 0) : ExtendedRational64(-1, 0)
     r = rationalize(Int64, x)
-    Qx64(r.num, r.den)
+    ExtendedRational64(r.num, r.den)
 end
 
 #===
@@ -105,6 +105,10 @@ nan(::Type{ExtendedRational64}) = ExtendedRational64(0, 0)
 inf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
 posinf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
 neginf(::Type{ExtendedRational64}) = ExtendedRational64(-1, 0)
+
+const NaN = nan
+const Inf = inf
+const NegInf = neginf
 
 #===
 Internal helpers
@@ -316,7 +320,8 @@ end
 
 function Base.rem(x::ExtendedRational64, y::ExtendedRational64)
     if _finite_nonzero_divisor(x, y)
-        return rem(_finite64(x), _finite64(y))
+        r = rem(_finite64(x), _finite64(y))
+        return ExtendedRational64(r)
     elseif _invalid_divisor_args(x, y)
         return nan(ExtendedRational64)
     end
@@ -324,7 +329,8 @@ end
 
 function Base.mod(x::ExtendedRational64, y::ExtendedRational64)
     if _finite_nonzero_divisor(x, y)
-        return mod(_finite64(x), _finite64(y))
+        r = mod(_finite64(x), _finite64(y))
+        return ExtendedRational64(r)
     elseif _invalid_divisor_args(x, y)
         return nan(ExtendedRational64)
     end
@@ -521,6 +527,6 @@ Base.trunc(x::ExtendedRational64) = isfinite(x) ? ExtendedRational64(trunc(Int12
 Base.floor(x::ExtendedRational64) = isfinite(x) ? ExtendedRational64(floor(Int128, x), 1) : nan(ExtendedRational64)
 Base.ceil(x::ExtendedRational64) = isfinite(x) ? ExtendedRational64(ceil(Int128, x), 1) : nan(ExtendedRational64)
 
-export ExtendedRational64, ℚx64, finite, isfinite, isinf, isnan
+export ExtendedRational64, finite, isfinite, isinf, isnan
 
 end # module

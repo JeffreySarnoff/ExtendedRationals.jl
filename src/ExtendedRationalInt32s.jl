@@ -71,10 +71,10 @@ ExtendedRational32(x::Rational32) = ExtendedRational32(x.num, x.den)
 ExtendedRational32(x::Rational{<:Integer}) = ExtendedRational32(numerator(x), denominator(x))
 
 function ExtendedRational32(x::AbstractFloat)
-    isnan(x) && return Qx32(0, 0)
-    isinf(x) && return x > 0 ? Qx32(1, 0) : Qx32(-1, 0)
+    isnan(x) && return ExtendedRational32(0, 0)
+    isinf(x) && return x > 0 ? ExtendedRational32(1, 0) : ExtendedRational32(-1, 0)
     r = rationalize(Int32, x)
-    Qx32(r.num, r.den)
+    ExtendedRational32(r.num, r.den)
 end
 
 #===
@@ -105,6 +105,10 @@ nan(::Type{ExtendedRational32}) = ExtendedRational32(0, 0)
 inf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
 posinf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
 neginf(::Type{ExtendedRational32}) = ExtendedRational32(-1, 0)
+
+const NaN = nan
+const Inf = inf
+const NegInf = neginf
 
 #===
 Internal helpers
@@ -308,7 +312,8 @@ end
 # Quotient/remainder family delegates finite computation to Rational32.
 function Base.rem(x::ExtendedRational32, y::ExtendedRational32)
     if _finite_nonzero_divisor(x, y)
-        return rem(_finite32(x), _finite32(y))
+        r = rem(_finite32(x), _finite32(y))
+        return ExtendedRational32(r)
     elseif _invalid_divisor_args(x, y)
         return nan(ExtendedRational32)
     end
@@ -316,7 +321,8 @@ end
 
 function Base.mod(x::ExtendedRational32, y::ExtendedRational32)
     if _finite_nonzero_divisor(x, y)
-        return mod(_finite32(x), _finite32(y))
+        r = mod(_finite32(x), _finite32(y))
+        return ExtendedRational32(r)
     elseif _invalid_divisor_args(x, y)
         return nan(ExtendedRational32)
     end
@@ -513,6 +519,6 @@ Base.trunc(x::ExtendedRational32) = isfinite(x) ? ExtendedRational32(trunc(Int64
 Base.floor(x::ExtendedRational32) = isfinite(x) ? ExtendedRational32(floor(Int64, x), 1) : nan(ExtendedRational32)
 Base.ceil(x::ExtendedRational32) = isfinite(x) ? ExtendedRational32(ceil(Int64, x), 1) : nan(ExtendedRational32)
 
-export ExtendedRational32, ℚx32, finite, isfinite, isinf, isnan
+export ExtendedRational32, finite, isfinite, isinf, isnan
 
 end # module
