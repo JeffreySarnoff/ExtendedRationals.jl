@@ -66,9 +66,9 @@ end
 
 const ℚx32 = ExtendedRational32
 
-Base.NaN(::ExtendedRational32) = Qx32(0, 0)
-Base.Inf(::ExtendedRational32) = Qx32(1, 0)
-NegInf(::ExtendedRational32) = Qx32(-1, 0)
+Base.NaN(::Type{T}) where {T<:ExtendedRational32} = Qx32(0, 0)
+Base.Inf(::Type{T}) where {T<:ExtendedRational32} = Qx32(1, 0)
+NegInf(::Type{T}) where {T<:ExtendedRational32} = Qx32(-1, 0)
 
 ExtendedRational32(n::Integer) = ExtendedRational32(n, 1)
 ExtendedRational32(x::Rational32) = ExtendedRational32(x.num, x.den)
