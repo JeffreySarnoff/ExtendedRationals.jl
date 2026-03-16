@@ -2,6 +2,8 @@ module ExtendedRationals
 
 export Qx32, Q32, Qx64, Q64, NaN, Inf, NegInf
 
+using Base: NaN, Inf
+
 include("ExtendedRationalInt32s.jl")
 include("ExtendedRationalInt64s.jl")
 

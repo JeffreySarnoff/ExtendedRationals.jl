@@ -65,6 +65,9 @@ struct ExtendedRational64 <: Real
 end
 
 const ℚx64 = ExtendedRational64
+
+NaN(::Type{ExtendedRational64}) = ExtendedRational64(0, 0)
+Inf(::Type{ExtendedRational64}) = ExtendedRational64(1, 0)
 NegInf(::Type{ExtendedRational64}) = ExtendedRational64(-1, 0)
 
 ExtendedRational64(n::Integer) = ExtendedRational64(n, 1)

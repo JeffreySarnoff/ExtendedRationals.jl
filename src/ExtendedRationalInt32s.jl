@@ -65,6 +65,9 @@ struct ExtendedRational32 <: Real
 end
 
 const ℚx32 = ExtendedRational32
+
+NaN(::Type{ExtendedRational32}) = ExtendedRational32(0, 0)
+Inf(::Type{ExtendedRational32}) = ExtendedRational32(1, 0)
 NegInf(::Type{ExtendedRational32}) = ExtendedRational32(-1, 0)
 
 ExtendedRational32(n::Integer) = ExtendedRational32(n, 1)
