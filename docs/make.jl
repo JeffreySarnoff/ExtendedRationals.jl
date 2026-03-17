@@ -27,4 +27,5 @@ makedocs(;
 deploydocs(;
     repo="github.com/JeffreySarnoff/ExtendedRationals.jl",
     devbranch="main",
+    push_preview=true,
 )
