@@ -1,41 +1,39 @@
 module ExtendedRationals
 
-export Qx32, Q32, Qx64, Q64, Qxf32, Qxf64
+export Qx32, Q32, Qx64, Q64
 
 using BitIntegers: Int256, Int512
 import Base: convert, promote, promote_type
 
-include("ExtendedRationalInt32s.jl")
-include("ExtendedRationalInt64s.jl")
 include("ExtendedRationalFast32s.jl")
 include("ExtendedRationalFast64s.jl")
 
-const Qx32 = ExtendedRationalInt32s.ExtendedRational32
-const Q32 = ExtendedRationalInt32s.Rational32
-const Qx64 = ExtendedRationalInt64s.ExtendedRational64
-const Q64 = ExtendedRationalInt64s.Rational64
-const Qxf32 = ExtendedRationalFast32s.ExtendedRationalFast32
-const Qxf64 = ExtendedRationalFast64s.ExtendedRationalFast64
+const Qx32 = ExtendedRationalFast32s.ExtendedRationalFast32
+const Q32 = ExtendedRationalFast32s.RationalInt32s.Rational32
+const Qx64 = ExtendedRationalFast64s.ExtendedRationalFast64
+const Q64 = ExtendedRationalFast64s.RationalInt64s.Rational64
 
 function Qx32(x::Qx64)
-    if ExtendedRationalInt64s.isnan(x)
-        return ExtendedRationalInt32s.nan(Qx32)
-    elseif ExtendedRationalInt64s.isinf(x)
-        return x.num > 0 ? ExtendedRationalInt32s.posinf(Qx32) : ExtendedRationalInt32s.neginf(Qx32)
+    if isnan(x)
+        return ExtendedRationalFast32s.nan(Qx32)
+    elseif isinf(x)
+        return x.num > 0 ? ExtendedRationalFast32s.posinf(Qx32) : ExtendedRationalFast32s.neginf(Qx32)
     end
 
-    limit = Int128(typemax(Int32)) * Int128(x.den)
-    magnitude = abs(Int128(x.num))
+    nx = numerator(x)
+    dx = denominator(x)
+    limit = Int128(typemax(Int32)) * Int128(dx)
+    magnitude = abs(Int128(nx))
     if magnitude > limit
-        return x.num > 0 ? ExtendedRationalInt32s.posinf(Qx32) : ExtendedRationalInt32s.neginf(Qx32)
+        return nx > 0 ? ExtendedRationalFast32s.posinf(Qx32) : ExtendedRationalFast32s.neginf(Qx32)
     end
 
-    nearest = ExtendedRationalInt32s.RationalInt32s._nearest_rational32(x.num // x.den)
+    nearest = ExtendedRationalFast32s.RationalInt32s._nearest_rational32(nx // dx)
     return Qx32(nearest)
 end
 
-Base.convert(::Type{Qx32}, x::Qx64) = Qx32(x.num, x.den)
-Base.convert(::Type{Qx64}, x::Qx32) = Qx64(x.num, x.den)
+Base.convert(::Type{Qx32}, x::Qx64) = Qx32(numerator(x), denominator(x))
+Base.convert(::Type{Qx64}, x::Qx32) = Qx64(numerator(x), denominator(x))
 
 Base.promote_type(::Type{Qx32}, ::Type{Qx64}) = Qx64
 Base.promote_type(::Type{Qx32}, ::Type{Rational}) = Qx32
