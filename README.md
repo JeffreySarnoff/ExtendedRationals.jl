@@ -26,6 +26,10 @@ Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overfl
 - Zero heap allocation: all arithmetic uses fixed-width integers (Int32/Int64/Int128/Int256)
 - `typemin` rejection prevents silent negation overflow
 
+## Examples
+
+See Use.jl for examples.
+
 ## Benchmarks
 
 All operations are zero-allocation unless noted. Times are minimum nanoseconds. 
