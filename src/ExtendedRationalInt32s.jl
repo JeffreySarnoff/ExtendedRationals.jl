@@ -150,26 +150,26 @@ end
 end
 
 @inline function _normalize_or_policy32(num::Integer, den::Integer)
-    try
-        nn, dd = _normalize32(num, den)
-        return _from_canonical32(nn, dd)
-    catch err
-        if err isa OverflowError
-            return _overflow_policy32(num, den)
-        end
-        rethrow()
+    den == 0 && return _overflow_policy32(num, den)
+    if den < 0
+        num = -num
+        den = -den
     end
+    if num == 0
+        return _from_canonical32(Int32(0), Int32(1))
+    end
+    g = gcd(num, den)
+    n = div(num, g)
+    d = div(den, g)
+    (typemin(Int32) < n <= typemax(Int32) && d <= typemax(Int32)) ||
+        return _overflow_policy32(n, d)
+    return _from_canonical32(Int32(n), Int32(d))
 end
 
 @inline function _canonical_or_policy32(num::Integer, den::Integer)
-    try
-        return _from_canonical32(_checked_int32(num), _checked_int32(den))
-    catch err
-        if err isa OverflowError
-            return _overflow_policy32(num, den)
-        end
-        rethrow()
-    end
+    (typemin(Int32) < num <= typemax(Int32) && typemin(Int32) < den <= typemax(Int32)) ||
+        return _overflow_policy32(num, den)
+    return _from_canonical32(Int32(num), Int32(den))
 end
 
 # Convert finite extended values to the finite Rational32 kernel.

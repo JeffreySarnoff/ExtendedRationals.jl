@@ -35,19 +35,19 @@ All operations are zero-allocation unless noted. Times are minimum nanoseconds.
 | Operation | `Rational{Int32}` | `Q32` | `Qx32` |
 | --- | --- | --- | --- |
 | construct(7,3) | 1 ns | 1 ns | 1 ns |
-| a + b | 13 ns | 7 ns | 9 ns |
-| a - b | 14 ns | 7 ns | 10 ns |
-| a * b | 8 ns | 8 ns | 10 ns |
-| a / b | 7 ns | 8 ns | 11 ns |
+| a + b | 13 ns | 7 ns | 8 ns |
+| a - b | 13 ns | 7 ns | 8 ns |
+| a * b | 8 ns | 8 ns | 8 ns |
+| a / b | 7 ns | 8 ns | 8 ns |
 | -a | 1 ns | 5 ns | 5 ns |
-| a < b | 1 ns | 1 ns | 2 ns |
+| a < b | 1 ns | 1 ns | 1 ns |
 | a == b | 1 ns | 1 ns | 2 ns |
 | abs(-a) | 1 ns | 11 ns | 12 ns |
 | inv(a) | 1 ns | 4 ns | 5 ns |
-| a ^ 3 | 18 ns | 27 ns | 34 ns |
-| muladd(a,b,a) | 23 ns | 17 ns | 22 ns |
-| fma(a,b,a) | 23 ns | 166 ns | 204 ns |
-| big + big | --- | --- | 20 ns |
+| a ^ 3 | 18 ns | 27 ns | 31 ns |
+| muladd(a,b,a) | 24 ns | 17 ns | 20 ns |
+| fma(a,b,a) | 23 ns | 168 ns | 194 ns |
+| big + big | --- | --- | 19 ns |
 | Inf + a | --- | --- | 3 ns |
 
 ### 64-bit
@@ -55,17 +55,17 @@ All operations are zero-allocation unless noted. Times are minimum nanoseconds.
 | Operation | `Rational{Int64}` | `Q64` | `Qx64` |
 | --- | --- | --- | --- |
 | construct(7,3) | 1 ns | 1 ns | 1 ns |
-| a + b | 13 ns | 19 ns | 24 ns |
-| a - b | 15 ns | 20 ns | 22 ns |
-| a * b | 8 ns | 9 ns | 32 ns |
-| a / b | 8 ns | 9 ns | 36 ns |
-| -a | 1 ns | 1 ns | 2 ns |
+| a + b | 13 ns | 19 ns | 20 ns |
+| a - b | 15 ns | 20 ns | 20 ns |
+| a * b | 8 ns | 9 ns | 28 ns |
+| a / b | 8 ns | 9 ns | 30 ns |
+| -a | 1 ns | 1 ns | 1 ns |
 | a < b | 1 ns | 1 ns | 2 ns |
-| a == b | 1 ns | 1 ns | 2 ns |
-| abs(-a) | 1 ns | 6 ns | 2 ns |
-| inv(a) | 2 ns | 6 ns | 6 ns |
-| a ^ 3 | 21 ns | 27 ns | 104 ns |
-| muladd(a,b,a) | 27 ns | 29 ns | 63 ns |
-| fma(a,b,a) | 27 ns | 826 ns | 843 ns |
-| big + big | --- | --- | 83 ns |
-| Inf + a | --- | --- | 3 ns |
+| a == b | 1 ns | 1 ns | 1 ns |
+| abs(-a) | 1 ns | 7 ns | 2 ns |
+| inv(a) | 1 ns | 6 ns | 6 ns |
+| a ^ 3 | 21 ns | 27 ns | 96 ns |
+| muladd(a,b,a) | 27 ns | 29 ns | 61 ns |
+| fma(a,b,a) | 27 ns | 815 ns | 858 ns |
+| big + big | --- | --- | 82 ns |
+| Inf + a | --- | --- | 2 ns |

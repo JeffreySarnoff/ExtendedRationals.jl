@@ -150,26 +150,26 @@ end
 end
 
 @inline function _normalize_or_policy64(num::Integer, den::Integer)
-    try
-        nn, dd = _normalize64(num, den)
-        return _from_canonical64(nn, dd)
-    catch err
-        if err isa OverflowError
-            return _overflow_policy64(num, den)
-        end
-        rethrow()
+    den == 0 && return _overflow_policy64(num, den)
+    if den < 0
+        num = -num
+        den = -den
     end
+    if num == 0
+        return _from_canonical64(Int64(0), Int64(1))
+    end
+    g = gcd(num, den)
+    n = div(num, g)
+    d = div(den, g)
+    (typemin(Int64) < n <= typemax(Int64) && d <= typemax(Int64)) ||
+        return _overflow_policy64(n, d)
+    return _from_canonical64(Int64(n), Int64(d))
 end
 
 @inline function _canonical_or_policy64(num::Integer, den::Integer)
-    try
-        return _from_canonical64(_checked_int64(num), _checked_int64(den))
-    catch err
-        if err isa OverflowError
-            return _overflow_policy64(num, den)
-        end
-        rethrow()
-    end
+    (typemin(Int64) < num <= typemax(Int64) && typemin(Int64) < den <= typemax(Int64)) ||
+        return _overflow_policy64(num, den)
+    return _from_canonical64(Int64(num), Int64(den))
 end
 
 @inline _finite64(x::ExtendedRational64) = Rational64(x.num, x.den)
