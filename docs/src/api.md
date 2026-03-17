@@ -4,10 +4,15 @@
 
 | Type | Alias | Description |
 | ---- | ----- | ----------- |
-| `Rational32` | `Q32` | Strict exact rational, Int32-backed, throws on overflow |
-| `Rational64` | `Q64` | Strict exact rational, Int64-backed, throws on overflow |
 | `XRational32` | `Qx32` | Extended rational with Inf/NaN, lazy normalization, Int64 intermediates |
 | `XRational64` | `Qx64` | Extended rational with Inf/NaN, lazy normalization, Int128 intermediates |
+
+### Internal types (not exported)
+
+| Type | Description |
+| ---- | ----------- |
+| `Rational32` | Strict exact rational, Int32-backed, throws on overflow |
+| `Rational64` | Strict exact rational, Int64-backed, throws on overflow |
 
 ## Constructors
 
@@ -41,7 +46,7 @@ Module-local constructors (not exported, accessed via submodule):
 
 The table below shows every implemented operation and which type families support it.
 
-**Legend**: Q = Q32/Q64, Qx = Qx32/Qx64
+**Legend**: Q = Rational32/Rational64 (internal), Qx = Qx32/Qx64
 
 ### Construction and identity
 
@@ -86,8 +91,8 @@ All binary operations also accept mixed arguments with `Integer` and the corresp
 
 Intermediate precision by type:
 
-- Q32/Qx32: `x*y` computed in Int64, result via Stern-Brocot in Int128
-- Q64/Qx64: `x*y` computed in Int128, result via Stern-Brocot in Int256
+- Rational32/Qx32: `x*y` computed in Int64, result via Stern-Brocot in Int128
+- Rational64/Qx64: `x*y` computed in Int128, result via Stern-Brocot in Int256
 
 ### Quotient and remainder
 

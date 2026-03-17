@@ -1,6 +1,6 @@
 module XRationals
 
-export Qx32, Q32, Qx64, Q64
+export Qx32, Qx64
 
 using BitIntegers: Int256, Int512
 import Base: convert, promote, promote_type
@@ -9,9 +9,7 @@ include("XRational32s.jl")
 include("XRational64s.jl")
 
 const Qx32 = XRational32s.XRational32
-const Q32 = XRational32s.Rational32
 const Qx64 = XRational64s.XRational64
-const Q64 = XRational64s.Rational64
 
 function Qx32(x::Qx64)
     if isnan(x)

@@ -12,7 +12,7 @@ Pkg.add("XRationals")
 ```text
 Do you need Inf/NaN support?
 ├── No  → Do you need overflow detection?
-│         ├── Yes → Q32 or Q64
+│         ├── Yes → Rational32 or Rational64 (internal, import from submodule)
 │         └── No  → Rational{Int32} or Rational{Int64} (stdlib)
 └── Yes → Qx32 or Qx64
 ```
@@ -107,4 +107,4 @@ Qx64(3.14)   # best Int64 rational approximation of pi
 2. **Avoid accessing `numerator`/`denominator` in hot loops** — each call triggers normalization.
 3. **Use `muladd` instead of `fma`** unless you specifically need the exact intermediate guarantee. `muladd` is `x*y + z` with lazy normalization; `fma` must normalize first.
 4. **Qx32 is the fastest type** because Int32 intermediates use native Int64 arithmetic (single machine instruction), while Qx64 intermediates use Int128 (multi-word).
-5. **Use Q32/Q64** when you want to detect overflow early rather than propagating Inf through a long computation.
+5. **Use Rational32/Rational64** (via submodule import) when you want to detect overflow early rather than propagating Inf through a long computation.

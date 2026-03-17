@@ -1,4 +1,6 @@
 using XRationals
+using XRationals.XRational32s.Rational32s: Rational32
+using XRationals.XRational64s.Rational64s: Rational64
 
 # --- Exact rational arithmetic (no floating-point error) ---
 
@@ -70,16 +72,16 @@ println()
 
 # --- Strict (non-extended) rationals throw on overflow ---
 
-println("Strict rationals (Q32/Q64) throw on overflow:")
+println("Strict rationals (Rational32/Rational64) throw on overflow:")
 try
-    Q32(typemax(Int32), 1) + Q32(1, 1)
+    Rational32(typemax(Int32), 1) + Rational32(1, 1)
 catch e
-    println("  Q32 overflow: $(typeof(e))")
+    println("  Rational32 overflow: $(typeof(e))")
 end
 try
-    Q32(typemin(Int32), 1)
+    Rational32(typemin(Int32), 1)
 catch e
-    println("  Q32 rejects typemin: $(typeof(e))")
+    println("  Rational32 rejects typemin: $(typeof(e))")
 end
 println()
 
@@ -90,7 +92,7 @@ println("  All operations use Int32/Int64/Int128/Int256/Int512 internally")
 println("  No heap-allocated BigInt anywhere in the hot path")
 println()
 
-# fma with large args: exact intermediate in Int128 (Q32) or Int256 (Q64)
+# fma with large args: exact intermediate in Int128 (Rational32) or Int256 (Rational64)
 M32 = Qx32(typemax(Int32), 2)
 println("  Qx32 fma (Int128 intermediate):")
 println("    fma($M32, $M32, $(Qx32(1,1))) = $(fma(M32, M32, Qx32(1,1)))")
@@ -102,7 +104,7 @@ println("  Qx64 fma (Int256 intermediate):")
 println("    fma($M64, $N64, $Z64) = $(fma(M64, N64, Z64))")
 println()
 
-# Nearest rational approximation: Stern-Brocot in Int128 (Q32) or Int256 (Q64)
+# Nearest rational approximation: Stern-Brocot in Int128 (Rational32) or Int256 (Rational64)
 println("  Nearest-rational approximation (Stern-Brocot with Int256 convergents):")
 r = fma(Qx64(typemax(Int64) - 1, 1), Qx64(1, typemax(Int64)), Qx64(1, typemax(Int64)))
 println("    fma($(typemax(Int64)-1)//1, 1//$(typemax(Int64)), 1//$(typemax(Int64))) = $r")

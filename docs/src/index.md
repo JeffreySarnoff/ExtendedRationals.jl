@@ -8,15 +8,15 @@ XRationals.jl provides four rational number types in two families:
 
 | Type | Alias | Backing | Overflow | Normalization |
 | :---- | :----- | :------- | :-------- | :------------- |
-| `Rational32` | `Q32` | `Int32` | Throws `OverflowError` | Eager (always canonical) |
-| `Rational64` | `Q64` | `Int64` | Throws `OverflowError` | Eager (always canonical) |
 | `XRational32` | `Qx32` | `Int32` | Saturates to Inf/NaN | Lazy (Int64 intermediate) |
 | `XRational64` | `Qx64` | `Int64` | Saturates to Inf/NaN | Lazy (Int128 intermediate) |
+| `Rational32` | *(internal)* | `Int32` | Throws `OverflowError` | Eager (always canonical) |
+| `Rational64` | *(internal)* | `Int64` | Throws `OverflowError` | Eager (always canonical) |
 
 ## Choosing a type
 
-- **Need strict error detection?** Use `Q32` / `Q64`. Overflow throws immediately.
 - **Need IEEE-like robustness and speed?** Use `Qx32` / `Qx64`. Overflow saturates to Inf/NaN, and lazy normalization gives 3-13x speedups over `Rational{Int}` for chained arithmetic.
+- **Need strict error detection?** `Rational32` / `Rational64` are available internally. Overflow throws immediately.
 
 ## Quick start
 
@@ -53,7 +53,7 @@ Qx64(6, 8) == Qx64(3, 4)   # true (cross-multiply comparison)
 
 ## Pages
 
-- [Strict Rationals (Q32/Q64)](strict.md)
 - [Extended Rationals (Qx32/Qx64)](extended.md)
+- [Strict Rationals (Rational32/Rational64)](strict.md)
 - [Usage Guide](guide.md)
 - [API Reference](api.md)
