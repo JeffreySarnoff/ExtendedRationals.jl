@@ -1,4 +1,4 @@
-using ExtendedRationals
+using XRationals
 using Test
 
 include("Rational32s_tests.jl")
@@ -7,8 +7,8 @@ include("XRational32s_tests.jl")
 include("XRational64s_tests.jl")
 include("CrossWidth_tests.jl")
 
-#@testset "ExtendedRationals.jl" begin
+#@testset "XRationals.jl" begin
 #    @testset "Code quality (Aqua.jl)" begin
-#        Aqua.test_all(ExtendedRationals)
+#        Aqua.test_all(XRationals)
 #    end
 #end

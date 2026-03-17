@@ -1,4 +1,4 @@
-using ExtendedRationals
+using XRationals
 using Chairmarks
 
 function fmt_ns(t)

@@ -4,7 +4,7 @@
 
 ```julia
 using Pkg
-Pkg.add("ExtendedRationals")
+Pkg.add("XRationals")
 ```
 
 ## Type selection decision tree
@@ -24,7 +24,7 @@ Do you need Inf/NaN support?
 ### Accumulation without overflow crashes
 
 ```julia
-using ExtendedRationals
+using XRationals
 
 function safe_mean(values::Vector{Qx32})
     s = Qx32(0, 1)
@@ -42,7 +42,7 @@ safe_mean(data)   # Inf (graceful saturation)
 ### High-throughput inner loop
 
 ```julia
-using ExtendedRationals
+using XRationals
 
 function dot_product(xs::Vector{Qx64}, ys::Vector{Qx64})
     s = Qx64(0, 1)

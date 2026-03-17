@@ -42,7 +42,7 @@ Arithmetic and comparisons **never normalize**:
 ## Construction
 
 ```julia
-using ExtendedRationals
+using XRationals
 
 a = Qx32(2, 3)         # 2//3
 b = Qx64(355, 113)     # 355//113

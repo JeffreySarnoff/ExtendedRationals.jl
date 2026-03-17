@@ -22,7 +22,7 @@
 ## Construction
 
 ```julia
-using ExtendedRationals
+using XRationals
 
 a = Q32(2, 3)         # 2//3
 b = Q32(7)            # 7//1

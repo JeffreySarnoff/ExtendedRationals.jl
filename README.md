@@ -1,9 +1,9 @@
-# ExtendedRationals.jl
+# XRationals.jl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JeffreySarnoff.github.io/ExtendedRationals.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JeffreySarnoff.github.io/ExtendedRationals.jl/dev/)
-[![Build Status](https://github.com/JeffreySarnoff/ExtendedRationals.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JeffreySarnoff/ExtendedRationals.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/JeffreySarnoff/ExtendedRationals.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JeffreySarnoff/ExtendedRationals.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JeffreySarnoff.github.io/XRationals.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JeffreySarnoff.github.io/XRationals.jl/dev/)
+[![Build Status](https://github.com/JeffreySarnoff/XRationals.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JeffreySarnoff/XRationals.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/JeffreySarnoff/XRationals.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JeffreySarnoff/XRationals.jl)
 
 Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overflow-safe saturation, and lazy normalization for maximum throughput.
 

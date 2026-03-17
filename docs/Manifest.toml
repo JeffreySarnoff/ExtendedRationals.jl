@@ -133,13 +133,13 @@ version = "2.7.3+0"
     [deps.Expat_jll.syntax]
     julia_version = "1.6.0"
 
-[[deps.ExtendedRationals]]
+[[deps.XRationals]]
 deps = ["BitIntegers", "Chairmarks"]
 path = ".."
 uuid = "f354a88b-0804-406d-a35b-636616acac82"
 version = "0.1.0"
 
-    [deps.ExtendedRationals.syntax]
+    [deps.XRationals.syntax]
     julia_version = "1.10.0"
 
 [[deps.FileWatching]]

@@ -1,4 +1,4 @@
-using ExtendedRationals
+using XRationals
 using Test
 
 @testset "Cross-width extended rational constructors" begin

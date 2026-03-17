@@ -1,10 +1,10 @@
-# ExtendedRationals.jl
+# XRationals.jl
 
 Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overflow-safe saturation, lazy normalization, and zero heap allocation.
 
 ## Overview
 
-ExtendedRationals.jl provides four rational number types in two families:
+XRationals.jl provides four rational number types in two families:
 
 | Type | Alias | Backing | Overflow | Normalization |
 | :---- | :----- | :------- | :-------- | :------------- |
@@ -21,7 +21,7 @@ ExtendedRationals.jl provides four rational number types in two families:
 ## Quick start
 
 ```julia
-using ExtendedRationals
+using XRationals
 
 # Basic exact arithmetic
 a = Qx32(2, 3)

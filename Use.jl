@@ -1,4 +1,4 @@
-using ExtendedRationals
+using XRationals
 
 # --- Exact rational arithmetic (no floating-point error) ---
 

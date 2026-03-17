@@ -1,4 +1,4 @@
-module ExtendedRationals
+module XRationals
 
 export Qx32, Q32, Qx64, Q64
 
@@ -39,4 +39,4 @@ Base.promote_type(::Type{Qx32}, ::Type{Qx64}) = Qx64
 Base.promote_type(::Type{Qx32}, ::Type{Rational}) = Qx32
 Base.promote_type(::Type{Qx64}, ::Type{Rational}) = Qx64
 
-end # module ExtendedRationals
+end # module XRationals

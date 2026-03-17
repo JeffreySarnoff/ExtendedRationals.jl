@@ -1,4 +1,4 @@
-name = "ExtendedRationals"
+name = "XRationals"
 uuid = "f354a88b-0804-406d-a35b-636616acac82"
 version = "0.1.0"
 authors = ["Jeffrey Sarnoff <jeffrey.sarnoff@gmail.com>"]

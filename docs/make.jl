@@ -1,15 +1,15 @@
-using ExtendedRationals
+using XRationals
 using Documenter
 
 makedocs(;
     doctest=false,
-    modules=[ExtendedRationals],
+    modules=[XRationals],
     authors="Jeffrey Sarnoff <jeffrey.sarnoff@gmail.com>",
-    repo="https://github.com/JeffreySarnoff/ExtendedRationals.jl/blob/{commit}{path}#{line}",
-    sitename="ExtendedRationals.jl",
+    repo="https://github.com/JeffreySarnoff/XRationals.jl/blob/{commit}{path}#{line}",
+    sitename="XRationals.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://JeffreySarnoff.github.io/ExtendedRationals.jl",
+        canonical="https://JeffreySarnoff.github.io/XRationals.jl",
         edit_link="main",
         assets=String[],
     ),
@@ -24,7 +24,7 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/JeffreySarnoff/ExtendedRationals.jl",
+    repo="github.com/JeffreySarnoff/XRationals.jl",
     devbranch="main",
     push_preview=true,
 )
