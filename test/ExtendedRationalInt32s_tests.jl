@@ -80,7 +80,8 @@ end
     @test pinf >= one
 
     @test ExtendedRational32(typemax(Int32), 1) + ExtendedRational32(1, 1) == pinf
-    @test ExtendedRational32(typemin(Int32), 1) - ExtendedRational32(1, 1) == ninf
+    @test_throws OverflowError ExtendedRational32(typemin(Int32), 1)
+    @test ExtendedRational32(typemin(Int32) + 1, 1) - ExtendedRational32(1, 1) == ninf
 
     ca = ExtendedRational32(387, 178085)
     cb = ExtendedRational32(203, 103382)
@@ -89,7 +90,8 @@ end
     @test ExtendedRational32(1, typemax(Int32)) * ExtendedRational32(1, typemax(Int32)) == pinf
     @test ExtendedRational32(-1, typemax(Int32)) * ExtendedRational32(1, typemax(Int32)) == ninf
     @test ExtendedRational32(typemax(Int32), 1) / ExtendedRational32(1, typemax(Int32)) == pinf
-    @test ExtendedRational32(typemin(Int32), 1) / ExtendedRational32(1, typemax(Int32)) == ninf
+    @test_throws OverflowError ExtendedRational32(typemin(Int32), typemax(Int32))
+    @test ExtendedRational32(typemin(Int32) + 1, 1) / ExtendedRational32(1, typemax(Int32)) == ninf
 end
 
 @testset "ExtendedRational32 rational-valued functions" begin

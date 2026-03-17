@@ -25,6 +25,8 @@ struct Rational64 <: Real
     Rational64(num::Int64, den::Int64, ::Val{:canonical}) = new(num, den)
 
     function Rational64(num::Integer, den::Integer)
+        num == typemin(Int64) && throw(OverflowError("typemin(Int64) is not allowed"))
+        den == typemin(Int64) && throw(OverflowError("typemin(Int64) is not allowed"))
         den == 0 && throw(ArgumentError("denominator must be nonzero"))
 
         if den < 0
@@ -40,8 +42,8 @@ struct Rational64 <: Real
         n = div(num, g)
         d = div(den, g)
 
-        typemin(Int64) <= n <= typemax(Int64) || throw(OverflowError("numerator does not fit in Int64"))
-        typemin(Int64) <= d <= typemax(Int64) || throw(OverflowError("denominator does not fit in Int64"))
+        typemin(Int64) < n <= typemax(Int64) || throw(OverflowError("numerator does not fit in Int64"))
+        typemin(Int64) < d <= typemax(Int64) || throw(OverflowError("denominator does not fit in Int64"))
 
         return new(Int64(n), Int64(d))
     end
@@ -108,7 +110,7 @@ Internal helpers
 ===#
 
 @inline function checked_int64(x::Integer)
-    typemin(Int64) <= x <= typemax(Int64) || throw(OverflowError("value does not fit in Int64"))
+    typemin(Int64) < x <= typemax(Int64) || throw(OverflowError("value does not fit in Int64"))
     return Int64(x)
 end
 

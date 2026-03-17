@@ -25,6 +25,8 @@ struct Rational32 <: Real
     Rational32(num::Int32, den::Int32, ::Val{:canonical}) = new(num, den)
 
     function Rational32(num::Integer, den::Integer)
+        num == typemin(Int32) && throw(OverflowError("typemin(Int32) is not allowed"))
+        den == typemin(Int32) && throw(OverflowError("typemin(Int32) is not allowed"))
         den == 0 && throw(ArgumentError("denominator must be nonzero"))
 
         # Keep the sign in the numerator.
@@ -41,8 +43,8 @@ struct Rational32 <: Real
         n = div(num, g)
         d = div(den, g)
 
-        typemin(Int32) <= n <= typemax(Int32) || throw(OverflowError("numerator does not fit in Int32"))
-        typemin(Int32) <= d <= typemax(Int32) || throw(OverflowError("denominator does not fit in Int32"))
+        typemin(Int32) < n <= typemax(Int32) || throw(OverflowError("numerator does not fit in Int32"))
+        typemin(Int32) < d <= typemax(Int32) || throw(OverflowError("denominator does not fit in Int32"))
 
         return new(Int32(n), Int32(d))
     end
@@ -109,7 +111,7 @@ Internal helpers
 ===#
 
 @inline function checked_int32(x::Integer)
-    typemin(Int32) <= x <= typemax(Int32) || throw(OverflowError("value does not fit in Int32"))
+    typemin(Int32) < x <= typemax(Int32) || throw(OverflowError("value does not fit in Int32"))
     return Int32(x)
 end
 

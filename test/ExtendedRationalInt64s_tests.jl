@@ -65,10 +65,13 @@ end
     @test isnan(ExtendedRational64(1, 0) * ExtendedRational64(0, 1))
     @test ExtendedRational64(1, 2) / ExtendedRational64(0, 1) == ExtendedRational64(1, 0)
     @test isnan(ExtendedRational64(0, 1) / ExtendedRational64(0, 1))
-    @test ExtendedRational64(int64min, 1) * ExtendedRational64(1, 1) == ExtendedRational64(int64min, 1)
-    @test ExtendedRational64(int64min, 1) / ExtendedRational64(1, 1) == ExtendedRational64(int64min, 1)
-    @test -ExtendedRational64(int64min, 1) == ExtendedRational64(1, 0)
-    @test abs(ExtendedRational64(int64min, 1)) == ExtendedRational64(1, 0)
+    @test_throws OverflowError ExtendedRational64(int64min, 1)
+    @test_throws OverflowError ExtendedRational64(1, int64min)
+    int64min1 = typemin(Int64) + 1
+    @test ExtendedRational64(int64min1, 1) * ExtendedRational64(1, 1) == ExtendedRational64(int64min1, 1)
+    @test ExtendedRational64(int64min1, 1) / ExtendedRational64(1, 1) == ExtendedRational64(int64min1, 1)
+    @test -ExtendedRational64(int64min1, 1) == ExtendedRational64(typemax(Int64), 1)
+    @test abs(ExtendedRational64(int64min1, 1)) == ExtendedRational64(typemax(Int64), 1)
 end
 
 @testset "ExtendedRational64 ordering and overflow policy" begin
@@ -87,7 +90,8 @@ end
     @test pinf >= one
 
     @test ExtendedRational64(int64max, 1) + ExtendedRational64(1, 1) == pinf
-    @test ExtendedRational64(int64min, 1) - ExtendedRational64(1, 1) == ninf
+    @test_throws OverflowError ExtendedRational64(int64min, 1)
+    @test ExtendedRational64(int64min + 1, 1) - ExtendedRational64(1, 1) == ninf
 
     ca = ExtendedRational64(1, 3037000500)
     cb = ExtendedRational64(1, 3037000501)
@@ -96,7 +100,7 @@ end
     @test ExtendedRational64(1, int64max) * ExtendedRational64(1, int64max) == pinf
     @test ExtendedRational64(-1, int64max) * ExtendedRational64(1, int64max) == ninf
     @test ExtendedRational64(int64max, 1) / ExtendedRational64(1, int64max) == pinf
-    @test ExtendedRational64(int64min, 1) / ExtendedRational64(1, int64max) == ninf
+    @test ExtendedRational64(int64min + 1, 1) / ExtendedRational64(1, int64max) == ninf
 end
 
 @testset "ExtendedRational64 rational-valued functions" begin
