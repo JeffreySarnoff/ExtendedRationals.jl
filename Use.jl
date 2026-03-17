@@ -16,7 +16,7 @@ println()
 
 inf = Qx32(1, 0)       # Inf32
 ninf = Qx32(-1, 0)      # -Inf32
-nan = Qx32(0, 0)       # NaN32
+nan = Qx32(0, 0)       # NaNQ32
 
 println("Special values:")
 println("  Inf:  $inf    isinf = $(isinf(inf))")
@@ -30,10 +30,10 @@ big_val = Qx32(typemax(Int32), 1)
 println("Overflow policy (saturates to Inf):")
 println("  $(big_val) + 1 = $(big_val + 1)")             # Inf32
 println("  Inf + 5 = $(inf + Qx32(5, 1))")               # Inf32
-println("  Inf + (-Inf) = $(inf + ninf)")                 # NaN32
-println("  Inf * 0 = $(inf * Qx32(0, 1))")               # NaN32
+println("  Inf + (-Inf) = $(inf + ninf)")                 # NaNQ32
+println("  Inf * 0 = $(inf * Qx32(0, 1))")               # NaNQ32
 println("  1/0 = $(Qx32(1, 2) / Qx32(0, 1))")           # Inf32
-println("  0/0 = $(Qx32(0, 1) / Qx32(0, 1))")           # NaN32
+println("  0/0 = $(Qx32(0, 1) / Qx32(0, 1))")           # NaNQ32
 println()
 
 # --- 64-bit for more range ---
@@ -104,7 +104,7 @@ println()
 
 # Nearest rational approximation: Stern-Brocot in Int128 (Q32) or Int256 (Q64)
 println("  Nearest-rational approximation (Stern-Brocot with Int256 convergents):")
-r = fma(Qx64(typemax(Int64)-1, 1), Qx64(1, typemax(Int64)), Qx64(1, typemax(Int64)))
+r = fma(Qx64(typemax(Int64) - 1, 1), Qx64(1, typemax(Int64)), Qx64(1, typemax(Int64)))
 println("    fma($(typemax(Int64)-1)//1, 1//$(typemax(Int64)), 1//$(typemax(Int64))) = $r")
 
 # Show the speed advantage with a timed comparison
@@ -142,14 +142,14 @@ println()
 
 # Benchmark: Qx32 vs Rational{Int32}
 println("  Speed comparison (chained a+b+c+d):")
-ar32, br32, cr32, dr32 = Rational{Int32}(Int32(2),Int32(3)), Rational{Int32}(Int32(5),Int32(7)), Rational{Int32}(Int32(3),Int32(13)), Rational{Int32}(Int32(11),Int32(7))
+ar32, br32, cr32, dr32 = Rational{Int32}(Int32(2), Int32(3)), Rational{Int32}(Int32(5), Int32(7)), Rational{Int32}(Int32(3), Int32(13)), Rational{Int32}(Int32(11), Int32(7))
 t_std32 = @be $ar32 + $br32 + $cr32 + $dr32
 t_qx32 = @be $a + $b + $c32 + $d32
 println("    Rational{Int32}: $(round(minimum(t_std32).time * 1e9, digits=0))ns")
 println("    Qx32:            $(round(minimum(t_qx32).time * 1e9, digits=0))ns")
 println("    Speedup:         $(round(minimum(t_std32).time / minimum(t_qx32).time, digits=1))x")
 
-ar64, br64, cr64, dr64 = Rational{Int64}(7,3), Rational{Int64}(5,11), Rational{Int64}(3,13), Rational{Int64}(11,7)
+ar64, br64, cr64, dr64 = Rational{Int64}(7, 3), Rational{Int64}(5, 11), Rational{Int64}(3, 13), Rational{Int64}(11, 7)
 t_std64 = @be $ar64 + $br64 + $cr64 + $dr64
 t_qx64 = @be $a64 + $b64 + $c64 + $d64
 println("    Rational{Int64}: $(round(minimum(t_std64).time * 1e9, digits=0))ns")

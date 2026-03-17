@@ -177,7 +177,7 @@ Display — normalizes before printing
 
 function Base.show(io::IO, x::XRational64)
     if isnan(x)
-        print(io, "NaN64f")
+        print(io, "NaNQ64")
     elseif isinf(x)
         print(io, x.num > 0 ? "Inf64f" : "-Inf64f")
     else
