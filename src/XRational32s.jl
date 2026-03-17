@@ -201,6 +201,10 @@ Base.convert(::Type{BigFloat}, x::XRational32) = isnan(x) ? BigFloat(Base.NaN) :
 Base.convert(::Type{Rational32}, x::XRational32) = isfinite(x) ? _finite32(x) : throw(InexactError(:convert, Rational32, x))
 Base.convert(::Type{Rational{Int32}}, x::XRational32) = isfinite(x) ? (numerator(x) // denominator(x)) : throw(InexactError(:convert, Rational{Int32}, x))
 
+Base.Float32(x::XRational32) = convert(Float32, x)
+Base.Float64(x::XRational32) = convert(Float64, x)
+Base.BigFloat(x::XRational32) = convert(BigFloat, x)
+
 Base.promote_rule(::Type{XRational32}, ::Type{<:Integer}) = XRational32
 Base.promote_rule(::Type{XRational32}, ::Type{Rational32}) = XRational32
 Base.promote_rule(::Type{XRational32}, ::Type{XRational32}) = XRational32
