@@ -28,7 +28,9 @@ Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overfl
 
 ## Benchmarks
 
-All operations are zero-allocation unless noted. Times are minimum nanoseconds.
+All operations are zero-allocation unless noted. Times are minimum nanoseconds. 
+
+Note: the fma for Qx32 and Qx64 returns the nearest rational to the true value.  Rational{Int32} and Rational{Int64} just perform a muladd.  This is the reason for slowdown in that function.  You can use muladd with Qx32 and Qx64 for improved performance.
 
 ### 32-bit
 
@@ -49,8 +51,6 @@ All operations are zero-allocation unless noted. Times are minimum nanoseconds.
 | a*b-c*d | 37 ns | 4 ns |
 | muladd(a,b,a) | 23 ns | 3 ns |
 | fma(a,b,a) | 23 ns | 215 ns |
-| big + big | --- | 18 ns |
-| Inf + a | --- | 2 ns |
 
 ### 64-bit
 
@@ -71,8 +71,6 @@ All operations are zero-allocation unless noted. Times are minimum nanoseconds.
 | a*b-c*d | 41 ns | 5 ns |
 | muladd(a,b,a) | 27 ns | 6 ns |
 | fma(a,b,a) | 27 ns | 859 ns |
-| big + big | --- | 81 ns |
-| Inf + a | --- | 2 ns |
 
 ### Qx64 vs Rational{Int64} Speedup
 

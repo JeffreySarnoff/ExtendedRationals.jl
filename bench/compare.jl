@@ -16,8 +16,6 @@ function run_table(label, R, make_r, make_qx)
     a_x, b_x = make_qx(7, 3), make_qx(5, 11)
     c_x, d_x = make_qx(3, 13), make_qx(11, 7)
 
-    big_x = make_qx(typemax(R) - 1, 3)
-
     ops = []
 
     push!(ops, ("construct(7,3)",
@@ -80,14 +78,6 @@ function run_table(label, R, make_r, make_qx)
         @be(fma($a_r, $b_r, $a_r)),
         @be(fma($a_x, $b_x, $a_x))))
 
-    push!(ops, ("big + big",
-        nothing,
-        @be($big_x + $big_x)))
-
-    inf_x = make_qx(1, 0)
-    push!(ops, ("Inf + a",
-        nothing,
-        @be($inf_x + $a_x)))
 
     r_label = "`Rational{$(R)}`"
     qx_label = R == Int32 ? "`Qx32`" : "`Qx64`"
