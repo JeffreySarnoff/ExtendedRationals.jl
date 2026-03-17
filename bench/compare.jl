@@ -96,9 +96,15 @@ function run_table(label, R, Q, Qx, make_r, make_q, make_qx)
         @be($a_q ^ 3),
         @be($a_x ^ 3)))
 
+    # muladd
+    push!(ops, ("muladd(a,b,a)",
+        @be(muladd($a_r, $b_r, $a_r)),
+        @be(muladd($a_q, $b_q, $a_q)),
+        @be(muladd($a_x, $b_x, $a_x))))
+
     # fma
     push!(ops, ("fma(a,b,a)",
-        nothing,
+        @be(fma($a_r, $b_r, $a_r)),
         @be(fma($a_q, $b_q, $a_q)),
         @be(fma($a_x, $b_x, $a_x))))
 
