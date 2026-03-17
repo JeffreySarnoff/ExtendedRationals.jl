@@ -180,7 +180,7 @@ function Base.show(io::IO, x::XRational32)
     if isnan(x)
         print(io, "NaNQ32")
     elseif isinf(x)
-        print(io, x.num > 0 ? "Inf32f" : "-Inf32f")
+        print(io, x.num > 0 ? "InfQ32" : "-InfQ32")
     else
         n = _normalize(x)
         print(io, n.num, "//", n.den)

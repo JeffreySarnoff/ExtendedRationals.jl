@@ -44,8 +44,8 @@ end
 
 @testset "XRational64 display and conversion" begin
     @test sprint(show, XRational64(3, 2)) == "3//2"
-    @test sprint(show, XRational64(1, 0)) == "Inf64f"
-    @test sprint(show, XRational64(-1, 0)) == "-Inf64f"
+    @test sprint(show, XRational64(1, 0)) == "InfQ64"
+    @test sprint(show, XRational64(-1, 0)) == "-InfQ64"
     @test sprint(show, XRational64(0, 0)) == "NaNQ64"
     # Display normalizes
     @test sprint(show, XRational64(6, 8)) == "3//4"

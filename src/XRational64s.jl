@@ -179,7 +179,7 @@ function Base.show(io::IO, x::XRational64)
     if isnan(x)
         print(io, "NaNQ64")
     elseif isinf(x)
-        print(io, x.num > 0 ? "Inf64f" : "-Inf64f")
+        print(io, x.num > 0 ? "InfQ64" : "-InfQ64")
     else
         n = _normalize(x)
         print(io, n.num, "//", n.den)

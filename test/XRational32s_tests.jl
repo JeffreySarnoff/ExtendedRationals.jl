@@ -44,8 +44,8 @@ end
 
 @testset "XRational32 display and conversion" begin
     @test sprint(show, XRational32(3, 2)) == "3//2"
-    @test sprint(show, XRational32(1, 0)) == "Inf32f"
-    @test sprint(show, XRational32(-1, 0)) == "-Inf32f"
+    @test sprint(show, XRational32(1, 0)) == "InfQ32"
+    @test sprint(show, XRational32(-1, 0)) == "-InfQ32"
     @test sprint(show, XRational32(0, 0)) == "NaNQ32"
     # Display normalizes
     @test sprint(show, XRational32(6, 8)) == "3//4"
