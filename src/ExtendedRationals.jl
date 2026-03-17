@@ -32,8 +32,8 @@ end
 Base.convert(::Type{Qx32}, x::Qx64) = Qx32(x.num, x.den)
 Base.convert(::Type{Qx64}, x::Qx32) = Qx64(x.num, x.den)
 
-Base.convert(::Type{Qx32}, x::Rational{I}) where {I<Integer} = Qx32(x.num, x.den)
-Base.convert(::Type{Qx64}, x::Rational{I}) where {I<Integer} = Qx64(x.num, x.den)
+Base.convert(::Type{Qx32}, x::Rational) = Qx32(x.num, x.den)
+Base.convert(::Type{Qx64}, x::Rational) = Qx64(x.num, x.den)
 
 Base.promote_type(::Type{Qx32}, ::Type{Qx64}) = Qx64
 Base.promote_type(::Type{Qx32}, ::Type{Rational}) = Qx32
