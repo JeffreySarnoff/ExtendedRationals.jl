@@ -1,17 +1,19 @@
 module ExtendedRationals
 
-export Qx32, Q32, Qx64, Q64
+export Qx32, Q32, Qx64, Q64, Qxf64
 
 using BitIntegers: Int256, Int512
 import Base: convert, promote, promote_type
 
 include("ExtendedRationalInt32s.jl")
 include("ExtendedRationalInt64s.jl")
+include("ExtendedRationalFast64s.jl")
 
 const Qx32 = ExtendedRationalInt32s.ExtendedRational32
 const Q32 = ExtendedRationalInt32s.Rational32
 const Qx64 = ExtendedRationalInt64s.ExtendedRational64
 const Q64 = ExtendedRationalInt64s.Rational64
+const Qxf64 = ExtendedRationalFast64s.ExtendedRationalFast64
 
 function Qx32(x::Qx64)
     if ExtendedRationalInt64s.isnan(x)
