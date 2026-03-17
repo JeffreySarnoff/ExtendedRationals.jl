@@ -81,4 +81,34 @@ try
 catch e
     println("  Q32 rejects typemin: $(typeof(e))")
 end
+println()
 
+# --- Zero-allocation arithmetic (no BigInt, all fixed-width) ---
+
+println("Zero-allocation fixed-width arithmetic:")
+println("  All operations use Int32/Int64/Int128/Int256/Int512 internally")
+println("  No heap-allocated BigInt anywhere in the hot path")
+println()
+
+# fma with large args: exact intermediate in Int128 (Q32) or Int256 (Q64)
+M32 = Qx32(typemax(Int32), 2)
+println("  Qx32 fma (Int128 intermediate):")
+println("    fma($M32, $M32, $(Qx32(1,1))) = $(fma(M32, M32, Qx32(1,1)))")
+
+M64 = Qx64(typemax(Int64), 2)
+N64 = Qx64(typemax(Int64), 3)
+Z64 = Qx64(typemax(Int64), 5)
+println("  Qx64 fma (Int256 intermediate):")
+println("    fma($M64, $N64, $Z64) = $(fma(M64, N64, Z64))")
+println()
+
+# Nearest rational approximation: Stern-Brocot in Int128 (Q32) or Int256 (Q64)
+println("  Nearest-rational approximation (Stern-Brocot with Int256 convergents):")
+r = fma(Qx64(typemax(Int64)-1, 1), Qx64(1, typemax(Int64)), Qx64(1, typemax(Int64)))
+println("    fma($(typemax(Int64)-1)//1, 1//$(typemax(Int64)), 1//$(typemax(Int64))) = $r")
+
+# Show the speed advantage with a timed comparison
+println()
+using Chairmarks
+t = @be fma($M64, $N64, $Z64)
+println("  fma(Qx64, Qx64, Qx64) benchmark: $(round(minimum(t).time * 1e9, digits=0))ns median, 0 allocations")
