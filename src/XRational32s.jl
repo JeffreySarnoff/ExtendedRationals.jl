@@ -1,7 +1,7 @@
 module XRational32s
 
 include("Rational32s.jl")
-using .Rational32s: Rational32
+using .Rational32s: Rational32, _nearest_rational32
 
 #===
 Public type — lazy normalization

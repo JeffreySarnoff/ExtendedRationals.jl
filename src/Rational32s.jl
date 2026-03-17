@@ -62,7 +62,7 @@ Rational32(x::Rational{<:Integer}) = Rational32(numerator(x), denominator(x))
 
 const ℚ32 = Rational32
 
-export Rational32, ℚ32
+export Rational32, ℚ32, _nearest_rational32
 
 # Basic properties
 #===

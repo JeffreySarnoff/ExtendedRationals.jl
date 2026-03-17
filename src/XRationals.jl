@@ -6,7 +6,9 @@ using BitIntegers: Int256, Int512
 import Base: convert, promote, promote_type
 
 include("XRational32s.jl")
+using .XRational32s
 include("XRational64s.jl")
+using .XRational64s
 
 const Qx32 = XRational32s.XRational32
 const Qx64 = XRational64s.XRational64
@@ -26,7 +28,7 @@ function Qx32(x::Qx64)
         return nx > 0 ? XRational32s.posinf(Qx32) : XRational32s.neginf(Qx32)
     end
 
-    nearest = XRational32s.Rational32s._nearest_rational32(nx // dx)
+    nearest = XRational32s._nearest_rational32(nx // dx)
     return Qx32(nearest)
 end
 
