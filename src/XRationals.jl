@@ -9,9 +9,9 @@ include("XRational32s.jl")
 include("XRational64s.jl")
 
 const Qx32 = XRational32s.XRational32
-const Q32 = XRational32s.Rational32s.Rational32
+const Q32 = XRational32s.Rational32
 const Qx64 = XRational64s.XRational64
-const Q64 = XRational64s.Rational64s.Rational64
+const Q64 = XRational64s.Rational64
 
 function Qx32(x::Qx64)
     if isnan(x)
