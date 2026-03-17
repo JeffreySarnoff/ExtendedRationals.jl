@@ -10,8 +10,8 @@ ExtendedRationals.jl provides four rational number types in two families:
 | :---- | :----- | :------- | :-------- | :------------- |
 | `Rational32` | `Q32` | `Int32` | Throws `OverflowError` | Eager (always canonical) |
 | `Rational64` | `Q64` | `Int64` | Throws `OverflowError` | Eager (always canonical) |
-| `ExtendedRationalFast32` | `Qx32` | `Int32` | Saturates to Inf/NaN | Lazy (Int64 intermediate) |
-| `ExtendedRationalFast64` | `Qx64` | `Int64` | Saturates to Inf/NaN | Lazy (Int128 intermediate) |
+| `XRational32` | `Qx32` | `Int32` | Saturates to Inf/NaN | Lazy (Int64 intermediate) |
+| `XRational64` | `Qx64` | `Int64` | Saturates to Inf/NaN | Lazy (Int128 intermediate) |
 
 ## Choosing a type
 

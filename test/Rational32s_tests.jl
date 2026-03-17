@@ -1,7 +1,7 @@
 using Test
 
-include("../src/RationalInt32s.jl")
-using .RationalInt32s
+include("../src/Rational32s.jl")
+using .Rational32s
 
 @testset "Rational32 rational-valued functions" begin
     x = Rational32(7, 3)

@@ -1,6 +1,6 @@
 # Extended Rationals — Qx32 / Qx64
 
-`ExtendedRationalFast32` (`Qx32`) and `ExtendedRationalFast64` (`Qx64`) combine IEEE-like special values with lazy GCD normalization for maximum throughput. Overflow saturates to Inf or NaN instead of throwing.
+`XRational32` (`Qx32`) and `XRational64` (`Qx64`) combine IEEE-like special values with lazy GCD normalization for maximum throughput. Overflow saturates to Inf or NaN instead of throwing.
 
 ## When to use
 

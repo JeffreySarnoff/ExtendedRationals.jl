@@ -5,19 +5,19 @@ export Qx32, Q32, Qx64, Q64
 using BitIntegers: Int256, Int512
 import Base: convert, promote, promote_type
 
-include("ExtendedRationalFast32s.jl")
-include("ExtendedRationalFast64s.jl")
+include("XRational32s.jl")
+include("XRational64s.jl")
 
-const Qx32 = ExtendedRationalFast32s.ExtendedRationalFast32
-const Q32 = ExtendedRationalFast32s.RationalInt32s.Rational32
-const Qx64 = ExtendedRationalFast64s.ExtendedRationalFast64
-const Q64 = ExtendedRationalFast64s.RationalInt64s.Rational64
+const Qx32 = XRational32s.XRational32
+const Q32 = XRational32s.Rational32s.Rational32
+const Qx64 = XRational64s.XRational64
+const Q64 = XRational64s.Rational64s.Rational64
 
 function Qx32(x::Qx64)
     if isnan(x)
-        return ExtendedRationalFast32s.nan(Qx32)
+        return XRational32s.nan(Qx32)
     elseif isinf(x)
-        return x.num > 0 ? ExtendedRationalFast32s.posinf(Qx32) : ExtendedRationalFast32s.neginf(Qx32)
+        return x.num > 0 ? XRational32s.posinf(Qx32) : XRational32s.neginf(Qx32)
     end
 
     nx = numerator(x)
@@ -25,10 +25,10 @@ function Qx32(x::Qx64)
     limit = Int128(typemax(Int32)) * Int128(dx)
     magnitude = abs(Int128(nx))
     if magnitude > limit
-        return nx > 0 ? ExtendedRationalFast32s.posinf(Qx32) : ExtendedRationalFast32s.neginf(Qx32)
+        return nx > 0 ? XRational32s.posinf(Qx32) : XRational32s.neginf(Qx32)
     end
 
-    nearest = ExtendedRationalFast32s.RationalInt32s._nearest_rational32(nx // dx)
+    nearest = XRational32s.Rational32s._nearest_rational32(nx // dx)
     return Qx32(nearest)
 end
 

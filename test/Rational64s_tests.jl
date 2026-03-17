@@ -1,7 +1,7 @@
 using Test
 
-include("../src/RationalInt64s.jl")
-using .RationalInt64s
+include("../src/Rational64s.jl")
+using .Rational64s
 
 @testset "Rational64 rational-valued functions" begin
     x = Rational64(7, 3)

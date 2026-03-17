@@ -6,8 +6,8 @@
 | ---- | ----- | ----------- |
 | `Rational32` | `Q32` | Strict exact rational, Int32-backed, throws on overflow |
 | `Rational64` | `Q64` | Strict exact rational, Int64-backed, throws on overflow |
-| `ExtendedRationalFast32` | `Qx32` | Extended rational with Inf/NaN, lazy normalization, Int64 intermediates |
-| `ExtendedRationalFast64` | `Qx64` | Extended rational with Inf/NaN, lazy normalization, Int128 intermediates |
+| `XRational32` | `Qx32` | Extended rational with Inf/NaN, lazy normalization, Int64 intermediates |
+| `XRational64` | `Qx64` | Extended rational with Inf/NaN, lazy normalization, Int128 intermediates |
 
 ## Constructors
 
@@ -22,7 +22,7 @@ T(x::Rational{<:Integer})  # from stdlib Rational
 
 `typemin(Int32)` and `typemin(Int64)` are rejected in both numerator and denominator positions to prevent silent negation overflow.
 
-## Special values (Extended and Fast types only)
+## Special values (Qx types only)
 
 ```julia
 T(1, 0)    # +Inf

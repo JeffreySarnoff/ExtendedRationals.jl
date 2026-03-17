@@ -5,32 +5,32 @@ println("=== Max bit-width analysis for each BigInt site ===\n")
 M64 = typemax(Int64)  # 2^63-1
 M32 = typemax(Int32)  # 2^31-1
 
-# RationalInt32s _compare_distance: target is Rational{Int128} from fma
+# Rational32s _compare_distance: target is Rational{Int128} from fma
 # target num/den up to ~2^93 (Int32^3 products after gcd)
 # an = |tn * a.den - a.num * td| ≈ 2^93 * 2^31 = 2^124
 # lhs = an * b.den ≈ 2^124 * 2^31 = 2^155
-println("RationalInt32s _compare_distance:")
+println("Rational32s _compare_distance:")
 println("  max product: 2^155 → fits Int256 (255 bits)? true")
 
-# RationalInt32s _nearest_rational32 clamp: limit * den(work)
+# Rational32s _nearest_rational32 clamp: limit * den(work)
 # limit = 2^31, den up to 2^93
-println("RationalInt32s clamp: 2^124 → fits Int128? true")
+println("Rational32s clamp: 2^124 → fits Int128? true")
 
-# RationalInt64s fma muladd: num = x.num*y.num*z.den + z.num*x.den*y.den
+# Rational64s fma muladd: num = x.num*y.num*z.den + z.num*x.den*y.den
 # each triple product ≈ (2^63)^3 = 2^189, sum ≈ 2^190
-println("\nRationalInt64s fma muladd:")
+println("\nRational64s fma muladd:")
 println("  max intermediate: 2^190 → fits Int256? true")
 
-# RationalInt64s _nearest_rational64 Stern-Brocot:
+# Rational64s _nearest_rational64 Stern-Brocot:
 # a = div(n, d) where n ≈ 2^190; p1 ≈ 2^63
 # a * p1 ≈ 2^253
-println("\nRationalInt64s Stern-Brocot convergents:")
+println("\nRational64s Stern-Brocot convergents:")
 println("  max a*p1: 2^253 → fits Int256? true")
 
-# RationalInt64s _compare_distance: target from fma
+# Rational64s _compare_distance: target from fma
 # tn ≈ 2^190, a.den ≈ 2^63, product ≈ 2^253
 # cross-multiply: 2^253 * 2^63 = 2^316
-println("\nRationalInt64s _compare_distance:")
+println("\nRational64s _compare_distance:")
 println("  |diff| * den: 2^253 * 2^63 = 2^316")
 println("  fits Int256? false (need Int512)")
 

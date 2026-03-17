@@ -1,10 +1,10 @@
 using ExtendedRationals
 using Test
 
-include("RationalInt32s_tests.jl")
-include("RationalInt64s_tests.jl")
-include("ExtendedRationalFast32s_tests.jl")
-include("ExtendedRationalFast64s_tests.jl")
+include("Rational32s_tests.jl")
+include("Rational64s_tests.jl")
+include("XRational32s_tests.jl")
+include("XRational64s_tests.jl")
 include("CrossWidth_tests.jl")
 
 #@testset "ExtendedRationals.jl" begin

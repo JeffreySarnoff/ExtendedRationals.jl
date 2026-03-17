@@ -114,69 +114,44 @@ t = @be fma($M64, $N64, $Z64)
 println("  fma(Qx64, Qx64, Qx64) benchmark: $(round(minimum(t).time * 1e9, digits=0))ns median, 0 allocations")
 println()
 
-# --- Fast types: lazy normalization for maximum throughput ---
+# --- Lazy normalization for maximum throughput ---
 
-println("Fast types (Qxf32, Qxf64) — lazy normalization:")
-println("  Qxf32 uses Int64 intermediates (native 64-bit ops)")
-println("  Qxf64 uses Int128 intermediates")
+println("Lazy normalization (Qx32/Qx64):")
+println("  Qx32 uses Int64 intermediates (native 64-bit ops)")
+println("  Qx64 uses Int128 intermediates")
 println("  GCD normalization is deferred until display, hashing, or conversion")
 println()
 
-af = Qxf32(2, 3)
-bf = Qxf32(5, 7)
-println("  Qxf32 arithmetic:")
-println("    $af + $bf = $(af + bf)")
-println("    $af * $bf = $(af * bf)")
-println("    $af ^ 3   = $(af ^ 3)")
-
 # Lazy storage: 6//8 stays unnormalized internally, normalizes on display
-raw = Qxf32(6, 8)
-println("    Qxf32(6, 8) displays as: $raw  (normalized on output)")
-println("    Qxf32(6, 8) == Qxf32(3, 4)? $(raw == Qxf32(3, 4))  (cross-multiply comparison)")
-println()
-
-af64 = Qxf64(2, 3)
-bf64 = Qxf64(5, 7)
-println("  Qxf64 arithmetic:")
-println("    $af64 + $bf64 = $(af64 + bf64)")
-println("    $af64 * $bf64 = $(af64 * bf64)")
-println("    $af64 ^ 3     = $(af64 ^ 3)")
-println()
-
-# Overflow saturation works the same
-bigf = Qxf32(typemax(Int32), 1)
-println("  Qxf32 overflow: $(bigf) + 1 = $(bigf + 1)")
-println("  Qxf32 Inf + a:  $(Qxf32(1,0) + Qxf32(5,1)) = $(Qxf32(1,0) + Qxf32(5,1))")
-println("  Qxf32 NaN:      $(Qxf32(0,0))")
-println()
-
-bigf64 = Qxf64(typemax(Int64), 1)
-println("  Qxf64 overflow: $(bigf64) + 1 = $(bigf64 + 1)")
+raw = Qx32(6, 8)
+println("  Qx32(6, 8) displays as: $raw  (normalized on output)")
+println("  Qx32(6, 8) == Qx32(3, 4)? $(raw == Qx32(3, 4))  (cross-multiply comparison)")
 println()
 
 # Chained operations show the biggest speedup (no intermediate GCDs)
 println("  Chained operations (where lazy normalization shines):")
-c, d = Qxf32(3, 13), Qxf32(11, 7)
-println("    Qxf32: a+b+c+d = $(af + bf + c + d)")
-println("    Qxf32: a*b-c*d = $(af * bf - c * d)")
+c32, d32 = Qx32(3, 13), Qx32(11, 7)
+println("    Qx32: a+b+c+d = $(a + b + c32 + d32)")
+println("    Qx32: a*b-c*d = $(a * b - c32 * d32)")
 
-c64, d64 = Qxf64(3, 13), Qxf64(11, 7)
-println("    Qxf64: a+b+c+d = $(af64 + bf64 + c64 + d64)")
-println("    Qxf64: a*b-c*d = $(af64 * bf64 - c64 * d64)")
+a64, b64 = Qx64(2, 3), Qx64(5, 7)
+c64, d64 = Qx64(3, 13), Qx64(11, 7)
+println("    Qx64: a+b+c+d = $(a64 + b64 + c64 + d64)")
+println("    Qx64: a*b-c*d = $(a64 * b64 - c64 * d64)")
 println()
 
-# Benchmark: Qxf32 vs Rational{Int32}
+# Benchmark: Qx32 vs Rational{Int32}
 println("  Speed comparison (chained a+b+c+d):")
-a32, b32, c32, d32 = Rational{Int32}(Int32(2),Int32(3)), Rational{Int32}(Int32(5),Int32(7)), Rational{Int32}(Int32(3),Int32(13)), Rational{Int32}(Int32(11),Int32(7))
-t_std32 = @be $a32 + $b32 + $c32 + $d32
-t_fast32 = @be $af + $bf + $c + $d
+ar32, br32, cr32, dr32 = Rational{Int32}(Int32(2),Int32(3)), Rational{Int32}(Int32(5),Int32(7)), Rational{Int32}(Int32(3),Int32(13)), Rational{Int32}(Int32(11),Int32(7))
+t_std32 = @be $ar32 + $br32 + $cr32 + $dr32
+t_qx32 = @be $a + $b + $c32 + $d32
 println("    Rational{Int32}: $(round(minimum(t_std32).time * 1e9, digits=0))ns")
-println("    Qxf32:           $(round(minimum(t_fast32).time * 1e9, digits=0))ns")
-println("    Speedup:         $(round(minimum(t_std32).time / minimum(t_fast32).time, digits=1))x")
+println("    Qx32:            $(round(minimum(t_qx32).time * 1e9, digits=0))ns")
+println("    Speedup:         $(round(minimum(t_std32).time / minimum(t_qx32).time, digits=1))x")
 
-a64r, b64r, c64r, d64r = Rational{Int64}(7,3), Rational{Int64}(5,11), Rational{Int64}(3,13), Rational{Int64}(11,7)
-t_std64 = @be $a64r + $b64r + $c64r + $d64r
-t_fast64 = @be $af64 + $bf64 + $c64 + $d64
+ar64, br64, cr64, dr64 = Rational{Int64}(7,3), Rational{Int64}(5,11), Rational{Int64}(3,13), Rational{Int64}(11,7)
+t_std64 = @be $ar64 + $br64 + $cr64 + $dr64
+t_qx64 = @be $a64 + $b64 + $c64 + $d64
 println("    Rational{Int64}: $(round(minimum(t_std64).time * 1e9, digits=0))ns")
-println("    Qxf64:           $(round(minimum(t_fast64).time * 1e9, digits=0))ns")
-println("    Speedup:         $(round(minimum(t_std64).time / minimum(t_fast64).time, digits=1))x")
+println("    Qx64:            $(round(minimum(t_qx64).time * 1e9, digits=0))ns")
+println("    Speedup:         $(round(minimum(t_std64).time / minimum(t_qx64).time, digits=1))x")

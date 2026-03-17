@@ -1,4 +1,4 @@
-module RationalInt32s
+module Rational32s
 
 using BitIntegers: Int256
 
