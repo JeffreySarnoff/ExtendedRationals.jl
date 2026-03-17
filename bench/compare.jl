@@ -139,7 +139,7 @@ function run_table(label, R, Q, Qx, make_r, make_q, make_qx; Qxf=nothing, make_q
     r_label = "Rational{$(R)}"
     q_label = R == Int32 ? "Q32" : "Q64"
     qx_label = R == Int32 ? "Qx32" : "Qx64"
-    qxf_label = has_fast ? "Qxf64" : ""
+    qxf_label = has_fast ? (R == Int32 ? "Qxf32" : "Qxf64") : ""
 
     ncols = has_fast ? 5 : 4
     colw = 20
@@ -181,7 +181,9 @@ run_table(
     ExtendedRationals.Qx32,
     (n, d) -> Rational{Int32}(Int32(n), Int32(d)),
     (n, d) -> Q32(n, d),
-    (n, d) -> Qx32(n, d)
+    (n, d) -> Qx32(n, d);
+    Qxf=ExtendedRationals.Qxf32,
+    make_qxf=(n, d) -> Qxf32(n, d)
 )
 
 # --- 64-bit table ---

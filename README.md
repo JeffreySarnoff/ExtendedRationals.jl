@@ -15,7 +15,8 @@ Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf) and ove
 | `Rational64` | `Q64` | `Int64` | Throws `OverflowError` |
 | `ExtendedRational32` | `Qx32` | `Int32` | Saturates to Inf/NaN |
 | `ExtendedRational64` | `Qx64` | `Int64` | Saturates to Inf/NaN |
-| `ExtendedRationalFast64` | `Qxf64` | `Int64` | Saturates to Inf/NaN, lazy normalization |
+| `ExtendedRationalFast32` | `Qxf32` | `Int32` | Saturates to Inf/NaN, lazy normalization (Int64 intermediate) |
+| `ExtendedRationalFast64` | `Qxf64` | `Int64` | Saturates to Inf/NaN, lazy normalization (Int128 intermediate) |
 
 ## Features
 
@@ -33,25 +34,25 @@ All operations are zero-allocation unless noted. Times are minimum nanoseconds.
 
 ### 32-bit
 
-| Operation | `Rational{Int32}` | `Q32` | `Qx32` |
-| --- | --- | --- | --- |
-| construct(7,3) | 1 ns | 1 ns | 1 ns |
-| a + b | 13 ns | 7 ns | 8 ns |
-| a - b | 13 ns | 7 ns | 8 ns |
-| a * b | 8 ns | 8 ns | 8 ns |
-| a / b | 7 ns | 8 ns | 8 ns |
-| -a | 1 ns | 5 ns | 5 ns |
-| a < b | 1 ns | 1 ns | 2 ns |
-| a == b | 1 ns | 1 ns | 1 ns |
-| abs(-a) | 1 ns | 11 ns | 12 ns |
-| inv(a) | 1 ns | 4 ns | 5 ns |
-| a ^ 3 | 18 ns | 27 ns | 31 ns |
-| a+b+c+d | 66 ns | 40 ns | 46 ns |
-| a*b-c*d | 37 ns | 27 ns | 27 ns |
-| muladd(a,b,a) | 24 ns | 17 ns | 20 ns |
-| fma(a,b,a) | 23 ns | 168 ns | 194 ns |
-| big + big | --- | --- | 19 ns |
-| Inf + a | --- | --- | 3 ns |
+| Operation | `Rational{Int32}` | `Q32` | `Qx32` | `Qxf32` |
+| --- | --- | --- | --- | --- |
+| construct(7,3) | 1 ns | 1 ns | 1 ns | 1 ns |
+| a + b | 13 ns | 7 ns | 8 ns | 2 ns |
+| a - b | 14 ns | 7 ns | 8 ns | 2 ns |
+| a * b | 8 ns | 8 ns | 8 ns | 2 ns |
+| a / b | 7 ns | 8 ns | 8 ns | 2 ns |
+| -a | 1 ns | 5 ns | 5 ns | 1 ns |
+| a < b | 1 ns | 1 ns | 1 ns | 2 ns |
+| a == b | 1 ns | 1 ns | 1 ns | 1 ns |
+| abs(-a) | 1 ns | 11 ns | 12 ns | 2 ns |
+| inv(a) | 1 ns | 4 ns | 5 ns | 2 ns |
+| a ^ 3 | 18 ns | 27 ns | 31 ns | 5 ns |
+| a+b+c+d | 66 ns | 40 ns | 46 ns | 5 ns |
+| a*b-c*d | 37 ns | 28 ns | 28 ns | 4 ns |
+| muladd(a,b,a) | 23 ns | 17 ns | 20 ns | 3 ns |
+| fma(a,b,a) | 23 ns | 168 ns | 194 ns | 213 ns |
+| big + big | --- | --- | 19 ns | 18 ns |
+| Inf + a | --- | --- | 3 ns | 2 ns |
 
 ### 64-bit
 

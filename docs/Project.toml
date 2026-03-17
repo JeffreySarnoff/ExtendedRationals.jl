@@ -1,3 +1,7 @@
 [deps]
-ExtendedRationals = "f354a88b-0804-406d-a35b-636616acac82"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+ExtendedRationals = "f354a88b-0804-406d-a35b-636616acac82"
+
+[sources]
+Documenter = {rev = "master", url = "https://github.com/JuliaDocs/Documenter.jl.git"}
+ExtendedRationals = {path = ".."}

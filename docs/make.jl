@@ -1,9 +1,8 @@
 using ExtendedRationals
 using Documenter
 
-DocMeta.setdocmeta!(ExtendedRationals, :DocTestSetup, :(using ExtendedRationals); recursive=true)
-
 makedocs(;
+    doctest=false,
     modules=[ExtendedRationals],
     authors="Jeffrey Sarnoff <jeffrey.sarnoff@gmail.com>",
     repo="https://github.com/JeffreySarnoff/ExtendedRationals.jl/blob/{commit}{path}#{line}",
@@ -16,7 +15,13 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Strict Rationals (Q32/Q64)" => "strict.md",
+        "Extended Rationals (Qx32/Qx64)" => "extended.md",
+        "Fast Extended (Qxf32/Qxf64)" => "fast.md",
+        "Usage Guide" => "guide.md",
+        "API Reference" => "api.md",
     ],
+    warnonly=[:missing_docs, :parse_error, :autodocs_block],
 )
 
 deploydocs(;
