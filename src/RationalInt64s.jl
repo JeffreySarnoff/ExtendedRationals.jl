@@ -1,5 +1,7 @@
 module RationalInt64s
 
+using BitIntegers: Int256, Int512
+
 
 #===
 Public type and canonical representation
@@ -133,17 +135,10 @@ end
 
 @inline function _quot_numden(x::Rational64, y::Rational64)
     iszero(y) && throw(DivideError())
-    return BigInt(x.num) * BigInt(y.den), BigInt(x.den) * BigInt(y.num)
+    return Int128(x.num) * Int128(y.den), Int128(x.den) * Int128(y.num)
 end
 
-@inline function _remainder_from_q(x::Rational64, y::Rational64, q::Integer)
-    rn = BigInt(x.num) * BigInt(y.den) - BigInt(q) * BigInt(x.den) * BigInt(y.num)
-    rd = BigInt(x.den) * BigInt(y.den)
-    n, d = normalize64(rn, rd)
-    return _from_canonical64(n, d)
-end
-
-@inline _rational_big(x::Rational64) = BigInt(x.num) // BigInt(x.den)
+@inline _rational256(x::Rational64) = Int256(x.num) // Int256(x.den)
 
 @inline function _apply_sign(x::Rational64, negative::Bool)
     return negative ? _from_canonical64(Int64(-x.num), x.den) : x
@@ -158,15 +153,15 @@ end
     return a.den <= b.den ? a : b
 end
 
-function _compare_distance(target::Rational{BigInt}, a::Rational64, b::Rational64)
-    tn = numerator(target)
-    td = denominator(target)
+function _compare_distance(target::Rational{Int256}, a::Rational64, b::Rational64)
+    tn = Int512(numerator(target))
+    td = Int512(denominator(target))
 
-    an = abs(tn * BigInt(a.den) - BigInt(a.num) * td)
-    bn = abs(tn * BigInt(b.den) - BigInt(b.num) * td)
+    an = abs(tn * Int512(a.den) - Int512(a.num) * td)
+    bn = abs(tn * Int512(b.den) - Int512(b.num) * td)
 
-    lhs = an * BigInt(b.den)
-    rhs = bn * BigInt(a.den)
+    lhs = an * Int512(b.den)
+    rhs = bn * Int512(a.den)
 
     if lhs < rhs
         return -1
@@ -177,10 +172,10 @@ function _compare_distance(target::Rational{BigInt}, a::Rational64, b::Rational6
     end
 end
 
-function _nearest_rational64(target::Rational{BigInt})
+function _nearest_rational64(target::Rational{Int256})
     iszero(target) && return zero(Rational64)
 
-    limit = BigInt(typemax(Int64))
+    limit = Int256(typemax(Int64))
     negative = target < 0
     work = negative ? -target : target
 
@@ -200,10 +195,10 @@ function _nearest_rational64(target::Rational{BigInt})
     n = numerator(work)
     d = denominator(work)
 
-    p0 = BigInt(0)
-    q0 = BigInt(1)
-    p1 = BigInt(1)
-    q1 = BigInt(0)
+    p0 = Int256(0)
+    q0 = Int256(1)
+    p1 = Int256(1)
+    q1 = Int256(0)
 
     while true
         a = div(n, d)
@@ -239,14 +234,14 @@ Arithmetic
 ===#
 
 @inline function Base.:+(x::Rational64, y::Rational64)
-    n, d = normalize64(BigInt(x.num) * BigInt(y.den) + BigInt(y.num) * BigInt(x.den),
-        BigInt(x.den) * BigInt(y.den))
+    n, d = normalize64(Int128(x.num) * Int128(y.den) + Int128(y.num) * Int128(x.den),
+        Int128(x.den) * Int128(y.den))
     return _from_canonical64(n, d)
 end
 
 @inline function Base.:-(x::Rational64, y::Rational64)
-    n, d = normalize64(BigInt(x.num) * BigInt(y.den) - BigInt(y.num) * BigInt(x.den),
-        BigInt(x.den) * BigInt(y.den))
+    n, d = normalize64(Int128(x.num) * Int128(y.den) - Int128(y.num) * Int128(x.den),
+        Int128(x.den) * Int128(y.den))
     return _from_canonical64(n, d)
 end
 
@@ -282,21 +277,25 @@ end
 end
 
 Base.inv(x::Rational64) = iszero(x) ? throw(DivideError()) : Rational64(x.den, x.num)
-Base.:-(x::Rational64) = Rational64(-BigInt(x.num), x.den)
+Base.:-(x::Rational64) = _from_canonical64(-x.num, x.den)
 
 Base.copysign(x::Rational64, y::Real) = signbit(x) == signbit(y) ? x : -x
 Base.flipsign(x::Rational64, y::Real) = signbit(y) ? -x : x
 
 function Base.rem(x::Rational64, y::Rational64)
     num, den = _quot_numden(x, y)
-    q = div(num, den)
-    return _remainder_from_q(x, y, q)
+    rn = rem(num, den)
+    rd = Int128(x.den) * Int128(y.den)
+    n, d = normalize64(rn, rd)
+    return _from_canonical64(n, d)
 end
 
 function Base.mod(x::Rational64, y::Rational64)
     num, den = _quot_numden(x, y)
-    q = fld(num, den)
-    return _remainder_from_q(x, y, q)
+    rn = mod(num, den)
+    rd = Int128(x.den) * Int128(y.den)
+    n, d = normalize64(rn, rd)
+    return _from_canonical64(n, d)
 end
 
 function Base.fld(x::Rational64, y::Rational64)
@@ -314,7 +313,10 @@ end
 function Base.divrem(x::Rational64, y::Rational64)
     num, den = _quot_numden(x, y)
     q = div(num, den)
-    return q, _remainder_from_q(x, y, q)
+    rn = rem(num, den)
+    rd = Int128(x.den) * Int128(y.den)
+    n, d = normalize64(rn, rd)
+    return q, _from_canonical64(n, d)
 end
 
 function Base.fldmod(x::Rational64, y::Rational64)
@@ -334,7 +336,7 @@ end
 
 Base.muladd(x::Rational64, y::Rational64, z::Rational64) = x * y + z
 function Base.fma(x::Rational64, y::Rational64, z::Rational64)
-    exact = muladd(_rational_big(x), _rational_big(y), _rational_big(z))
+    exact = muladd(_rational256(x), _rational256(y), _rational256(z))
     return _nearest_rational64(exact)
 end
 

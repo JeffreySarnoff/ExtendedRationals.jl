@@ -14,9 +14,9 @@ println()
 
 # --- IEEE-like special values: NaN, Inf, -Inf ---
 
-inf  = Qx32(1, 0)       # Inf32
+inf = Qx32(1, 0)       # Inf32
 ninf = Qx32(-1, 0)      # -Inf32
-nan  = Qx32(0, 0)       # NaN32
+nan = Qx32(0, 0)       # NaN32
 
 println("Special values:")
 println("  Inf:  $inf    isinf = $(isinf(inf))")
@@ -81,3 +81,4 @@ try
 catch e
     println("  Q32 rejects typemin: $(typeof(e))")
 end
+

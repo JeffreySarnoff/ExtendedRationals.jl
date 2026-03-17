@@ -2,6 +2,7 @@ module ExtendedRationals
 
 export Qx32, Q32, Qx64, Q64
 
+using BitIntegers: Int256, Int512
 import Base: convert, promote, promote_type
 
 include("ExtendedRationalInt32s.jl")
@@ -19,8 +20,8 @@ function Qx32(x::Qx64)
         return x.num > 0 ? ExtendedRationalInt32s.posinf(Qx32) : ExtendedRationalInt32s.neginf(Qx32)
     end
 
-    limit = BigInt(typemax(Int32)) * BigInt(x.den)
-    magnitude = abs(BigInt(x.num))
+    limit = Int128(typemax(Int32)) * Int128(x.den)
+    magnitude = abs(Int128(x.num))
     if magnitude > limit
         return x.num > 0 ? ExtendedRationalInt32s.posinf(Qx32) : ExtendedRationalInt32s.neginf(Qx32)
     end

@@ -1,5 +1,7 @@
 module RationalInt32s
 
+using BitIntegers: Int256
+
 
 #===
 Public type and canonical representation
@@ -144,8 +146,6 @@ end
     return _from_canonical32(n, d)
 end
 
-@inline _rational64(x::Rational32) = Int64(x.num) // Int64(x.den)
-
 @inline function _apply_sign(x::Rational32, negative::Bool)
     return negative ? _from_canonical32(Int32(-x.num), x.den) : x
 end
@@ -159,15 +159,15 @@ end
     return a.den <= b.den ? a : b
 end
 
-function _compare_distance(target::Rational{Int64}, a::Rational32, b::Rational32)
-    tn = BigInt(numerator(target))
-    td = BigInt(denominator(target))
+function _compare_distance(target::Rational, a::Rational32, b::Rational32)
+    tn = Int256(numerator(target))
+    td = Int256(denominator(target))
 
-    an = abs(tn * BigInt(a.den) - BigInt(a.num) * td)
-    bn = abs(tn * BigInt(b.den) - BigInt(b.num) * td)
+    an = abs(tn * Int256(a.den) - Int256(a.num) * td)
+    bn = abs(tn * Int256(b.den) - Int256(b.num) * td)
 
-    lhs = an * BigInt(b.den)
-    rhs = bn * BigInt(a.den)
+    lhs = an * Int256(b.den)
+    rhs = bn * Int256(a.den)
 
     if lhs < rhs
         return -1
@@ -178,7 +178,7 @@ function _compare_distance(target::Rational{Int64}, a::Rational32, b::Rational32
     end
 end
 
-function _nearest_rational32(target::Rational{Int64})
+function _nearest_rational32(target::Rational)
     iszero(target) && return zero(Rational32)
 
     limit = Int128(typemax(Int32))
@@ -186,7 +186,7 @@ function _nearest_rational32(target::Rational{Int64})
     work = negative ? -target : target
 
     # Clamp values outside the finite Rational32 range.
-    if BigInt(numerator(work)) > BigInt(limit) * BigInt(denominator(work))
+    if Int256(numerator(work)) > Int256(limit) * Int256(denominator(work))
         return _apply_sign(_from_canonical32(Int32(limit), Int32(1)), negative)
     end
 
@@ -337,8 +337,10 @@ end
 
 Base.muladd(x::Rational32, y::Rational32, z::Rational32) = x * y + z
 function Base.fma(x::Rational32, y::Rational32, z::Rational32)
-    exact = muladd(_rational64(x), _rational64(y), _rational64(z))
-    return _nearest_rational32(exact)
+    num = Int128(x.num) * Int128(y.num) * Int128(z.den) + Int128(z.num) * Int128(x.den) * Int128(y.den)
+    den = Int128(x.den) * Int128(y.den) * Int128(z.den)
+    g = gcd(num, den)
+    return _nearest_rational32(div(num, g) // div(den, g))
 end
 
 function Base.:^(x::Rational32, p::Integer)
