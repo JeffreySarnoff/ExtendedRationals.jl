@@ -2,9 +2,7 @@ using ExtendedRationals
 using Test
 
 include("RationalInt32s_tests.jl")
-include("ExtendedRationalInt32s_tests.jl")
 include("RationalInt64s_tests.jl")
-include("ExtendedRationalInt64s_tests.jl")
 include("ExtendedRationalFast32s_tests.jl")
 include("ExtendedRationalFast64s_tests.jl")
 include("CrossWidth_tests.jl")

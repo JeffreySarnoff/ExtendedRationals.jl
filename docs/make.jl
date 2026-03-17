@@ -17,7 +17,6 @@ makedocs(;
         "Home" => "index.md",
         "Strict Rationals (Q32/Q64)" => "strict.md",
         "Extended Rationals (Qx32/Qx64)" => "extended.md",
-        "Fast Extended (Qxf32/Qxf64)" => "fast.md",
         "Usage Guide" => "guide.md",
         "API Reference" => "api.md",
     ],

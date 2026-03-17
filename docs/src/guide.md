@@ -14,12 +14,10 @@ Do you need Inf/NaN support?
 ├── No  → Do you need overflow detection?
 │         ├── Yes → Q32 or Q64
 │         └── No  → Rational{Int32} or Rational{Int64} (stdlib)
-└── Yes → Do you need maximum throughput?
-          ├── Yes → Qxf32 or Qxf64
-          └── No  → Qx32 or Qx64
+└── Yes → Qx32 or Qx64
 ```
 
-**32-bit vs 64-bit**: Use 32-bit types when values fit in Int32 range and you want compact storage or are memory-bound. Use 64-bit when you need the full Int64 range.
+**32-bit vs 64-bit**: Use 32-bit types when values fit in Int32 range and you want compact storage or are memory-bound. Use 64-bit when you need the full Int64 range. Qx32 is the fastest type because Int32 intermediates use native Int64 arithmetic.
 
 ## Common patterns
 
@@ -38,7 +36,7 @@ end
 
 # Even if intermediate sums overflow, result is Inf rather than an exception
 data = [Qx32(typemax(Int32), 1), Qx32(typemax(Int32), 1)]
-safe_mean(data)   # Inf32 (graceful saturation)
+safe_mean(data)   # Inf (graceful saturation)
 ```
 
 ### High-throughput inner loop
@@ -46,8 +44,8 @@ safe_mean(data)   # Inf32 (graceful saturation)
 ```julia
 using ExtendedRationals
 
-function dot_product(xs::Vector{Qxf64}, ys::Vector{Qxf64})
-    s = Qxf64(0, 1)
+function dot_product(xs::Vector{Qx64}, ys::Vector{Qx64})
+    s = Qx64(0, 1)
     for i in eachindex(xs, ys)
         s += xs[i] * ys[i]
     end
@@ -55,8 +53,8 @@ function dot_product(xs::Vector{Qxf64}, ys::Vector{Qxf64})
 end
 
 # Each multiply and add skips GCD — only final display normalizes
-xs = [Qxf64(i, i+1) for i in 1:100]
-ys = [Qxf64(i+1, i+2) for i in 1:100]
+xs = [Qx64(i, i+1) for i in 1:100]
+ys = [Qx64(i+1, i+2) for i in 1:100]
 dot_product(xs, ys)
 ```
 
@@ -100,13 +98,13 @@ x = Qx64(r)
 
 # Convert from float
 Qx32(0.75)   # 3//4
-Qxf64(3.14)  # best Int64 rational approximation of pi
+Qx64(3.14)   # best Int64 rational approximation of pi
 ```
 
 ## Performance tips
 
-1. **Prefer Qxf32/Qxf64** for chains of arithmetic. The GCD savings compound with every operation.
-2. **Avoid accessing `numerator`/`denominator` in hot loops** with Fast types — each call triggers normalization.
+1. **Prefer Qx32/Qx64** for chains of arithmetic. The GCD savings compound with every operation.
+2. **Avoid accessing `numerator`/`denominator` in hot loops** — each call triggers normalization.
 3. **Use `muladd` instead of `fma`** unless you specifically need the exact intermediate guarantee. `muladd` is `x*y + z` with lazy normalization; `fma` must normalize first.
-4. **Qxf32 is the fastest type** because Int32 intermediates use native Int64 arithmetic (single machine instruction), while Qxf64 intermediates use Int128 (multi-word).
+4. **Qx32 is the fastest type** because Int32 intermediates use native Int64 arithmetic (single machine instruction), while Qx64 intermediates use Int128 (multi-word).
 5. **Use Q32/Q64** when you want to detect overflow early rather than propagating Inf through a long computation.
