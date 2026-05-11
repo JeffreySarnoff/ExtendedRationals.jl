@@ -7,6 +7,8 @@
 | `XRational32` | `Qx32` | Extended rational with Inf/NaN, lazy normalization, Int64 intermediates |
 | `XRational64` | `Qx64` | Extended rational with Inf/NaN, lazy normalization, Int128 intermediates |
 | `XRational128` | `Qx128` | Extended rational with Inf/NaN, lazy normalization, Int256 intermediates |
+| `XRational256` | `Qx256` | Extended rational with Inf/NaN, lazy normalization, Int512 intermediates |
+| `XRational512` | `Qx512` | Extended rational with Inf/NaN, lazy normalization, Int1024 intermediates |
 
 ## Constructors
 
@@ -19,7 +21,7 @@ T(float)            # best rational approximation
 T(x::Rational{<:Integer})  # from stdlib Rational
 ```
 
-`typemin(Int32)`, `typemin(Int64)`, and `typemin(Int128)` are rejected in both numerator and denominator positions to prevent silent negation overflow.
+`typemin(Int32)`, `typemin(Int64)`, `typemin(Int128)`, `typemin(Int256)`, and `typemin(Int512)` are rejected in both numerator and denominator positions to prevent silent negation overflow.
 
 ## Special values (Qx types only)
 
@@ -38,7 +40,7 @@ Module-local constructors (not exported, accessed via submodule):
 
 ## Complete operation list
 
-The tables below describe the public `Qx32`, `Qx64`, and `Qx128` API.
+The tables below describe the public `Qx32`, `Qx64`, `Qx128`, `Qx256`, and `Qx512` API.
 
 ### Construction and identity
 
@@ -86,6 +88,8 @@ Intermediate precision by type:
 - Qx32: `x*y` computed in Int64, result via Stern-Brocot in Int128
 - Qx64: `x*y` computed in Int128, result via Stern-Brocot in Int256
 - Qx128: `x*y` computed with wider fixed-width arithmetic, result via Stern-Brocot in Int512/Int1024
+- Qx256: finite arguments are routed through `Rational{Int256}` and converted back into Qx256
+- Qx512: finite arguments are routed through `Rational{Int512}` and converted back into Qx512
 
 ### Quotient and remainder
 
@@ -177,14 +181,32 @@ Exact widening is constructor-first in the public API. The corresponding `conver
 | --------- | ----------- |
 | `Qx32(x::Qx64)` | Narrow Qx64 to Qx32 via Stern-Brocot best approximation |
 | `Qx32(x::Qx128)` | Narrow Qx128 to Qx32 via Stern-Brocot best approximation |
+| `Qx32(x::Qx256)` | Narrow Qx256 to Qx32 via Stern-Brocot best approximation |
+| `Qx32(x::Qx512)` | Narrow Qx512 to Qx32 via Stern-Brocot best approximation |
 | `Qx64(x::Qx32)` | Widen Qx32 to Qx64 exactly |
 | `Qx64(x::Qx128)` | Narrow Qx128 to Qx64 via Stern-Brocot best approximation |
+| `Qx64(x::Qx256)` | Narrow Qx256 to Qx64 via Stern-Brocot best approximation |
+| `Qx64(x::Qx512)` | Narrow Qx512 to Qx64 via Stern-Brocot best approximation |
 | `Qx128(x::Qx32)` | Widen Qx32 to Qx128 exactly |
 | `Qx128(x::Qx64)` | Widen Qx64 to Qx128 exactly |
+| `Qx128(x::Qx256)` | Narrow Qx256 to Qx128 via Stern-Brocot best approximation |
+| `Qx128(x::Qx512)` | Narrow Qx512 to Qx128 via Stern-Brocot best approximation |
+| `Qx256(x::Qx32)` | Widen Qx32 to Qx256 exactly |
+| `Qx256(x::Qx64)` | Widen Qx64 to Qx256 exactly |
+| `Qx256(x::Qx128)` | Widen Qx128 to Qx256 exactly |
+| `Qx256(x::Qx512)` | Narrow Qx512 to Qx256 via Stern-Brocot best approximation |
+| `Qx512(x::Qx32)` | Widen Qx32 to Qx512 exactly |
+| `Qx512(x::Qx64)` | Widen Qx64 to Qx512 exactly |
+| `Qx512(x::Qx128)` | Widen Qx128 to Qx512 exactly |
+| `Qx512(x::Qx256)` | Widen Qx256 to Qx512 exactly |
 | `widen(Qx32)` | Return `Qx64` as the next wider extended rational type |
 | `widen(Qx64)` | Return `Qx128` as the next wider extended rational type |
+| `widen(Qx128)` | Return `Qx256` as the next wider extended rational type |
+| `widen(Qx256)` | Return `Qx512` as the next wider extended rational type |
 | `widen(x::Qx32)` | Widen a Qx32 value to Qx64 |
 | `widen(x::Qx64)` | Widen a Qx64 value to Qx128 |
+| `widen(x::Qx128)` | Widen a Qx128 value to Qx256 |
+| `widen(x::Qx256)` | Widen a Qx256 value to Qx512 |
 
 ### Hashing and display
 

@@ -1,6 +1,6 @@
 using XRationals
 using Test
-using BitIntegers: Int512
+using BitIntegers: Int256, Int512, Int1024
 
 @testset "Cross-width extended rational constructors" begin
     @test Qx32(Qx64(3, 2)) == Qx32(3, 2)
@@ -63,10 +63,158 @@ using BitIntegers: Int512
     @test Qx32(Qx128(1, 0)) == Qx32(1, 0)
     @test isnan(Qx32(Qx128(0, 0)))
     @test convert(Qx32, Qx128(7, 3)) == Qx32(7, 3)
+
+    widened256_from32 = Qx256(raw32)
+    @test widened256_from32 == Qx256(3, 4)
+    @test widened256_from32.num == Int256(6)
+    @test widened256_from32.den == Int256(8)
+    @test convert(Qx256, Qx32(7, 3)) == Qx256(7, 3)
+    @test Qx256(Qx32(1, 0)) == Qx256(1, 0)
+    @test Qx256(Qx32(-1, 0)) == Qx256(-1, 0)
+    @test isnan(Qx256(Qx32(0, 0)))
+
+    widened256_from64 = Qx256(raw64)
+    @test widened256_from64 == Qx256(5, 7)
+    @test widened256_from64.num == Int256(10)
+    @test widened256_from64.den == Int256(14)
+    @test convert(Qx256, Qx64(7, 3)) == Qx256(7, 3)
+    @test Qx256(Qx64(1, 0)) == Qx256(1, 0)
+    @test Qx256(Qx64(-1, 0)) == Qx256(-1, 0)
+    @test isnan(Qx256(Qx64(0, 0)))
+
+    raw128 = Qx128(10, 14)
+    widened256_from128 = Qx256(raw128)
+    @test widened256_from128 == Qx256(5, 7)
+    @test widened256_from128.num == Int256(10)
+    @test widened256_from128.den == Int256(14)
+    @test widen(Qx128) === Qx256
+    @test widen(raw128) == widened256_from128
+    @test convert(Qx256, Qx128(7, 3)) == Qx256(7, 3)
+    @test Qx256(Qx128(1, 0)) == Qx256(1, 0)
+    @test Qx256(Qx128(-1, 0)) == Qx256(-1, 0)
+    @test isnan(Qx256(Qx128(0, 0)))
+
+    @test Qx128(Qx256(7, 3)) == Qx128(7, 3)
+    @test Qx128(Qx256(1, Int256(typemax(Int128)) + 1)) == Qx128(1, typemax(Int128))
+    @test Qx128(Qx256(1, Int256(2) * Int256(typemax(Int128)) + 1)) == Qx128(0, 1)
+    @test Qx128(Qx256(Int256(typemax(Int128)) + 1, 1)) == Qx128(1, 0)
+    @test Qx128(Qx256(Int256(typemin(Int128)) - 1, 1)) == Qx128(-1, 0)
+    @test Qx128(Qx256(1, 0)) == Qx128(1, 0)
+    @test isnan(Qx128(Qx256(0, 0)))
+    @test convert(Qx128, Qx256(7, 3)) == Qx128(7, 3)
+
+    @test Qx64(Qx256(7, 3)) == Qx64(7, 3)
+    @test Qx64(Qx256(1, Int256(typemax(Int64)) + 1)) == Qx64(1, typemax(Int64))
+    @test Qx64(Qx256(1, Int256(2) * Int256(typemax(Int64)) + 1)) == Qx64(0, 1)
+    @test Qx64(Qx256(Int256(typemax(Int64)) + 1, 1)) == Qx64(1, 0)
+    @test Qx64(Qx256(Int256(typemin(Int64)) - 1, 1)) == Qx64(-1, 0)
+    @test Qx64(Qx256(1, 0)) == Qx64(1, 0)
+    @test isnan(Qx64(Qx256(0, 0)))
+    @test convert(Qx64, Qx256(7, 3)) == Qx64(7, 3)
+
+    @test Qx32(Qx256(7, 3)) == Qx32(7, 3)
+    @test Qx32(Qx256(1, Int256(typemax(Int32)) + 1)) == Qx32(1, typemax(Int32))
+    @test Qx32(Qx256(1, Int256(2) * Int256(typemax(Int32)) + 1)) == Qx32(0, 1)
+    @test Qx32(Qx256(Int256(typemax(Int32)) + 1, 1)) == Qx32(1, 0)
+    @test Qx32(Qx256(Int256(typemin(Int32)) - 1, 1)) == Qx32(-1, 0)
+    @test Qx32(Qx256(1, 0)) == Qx32(1, 0)
+    @test isnan(Qx32(Qx256(0, 0)))
+    @test convert(Qx32, Qx256(7, 3)) == Qx32(7, 3)
+
+    huge_num = Int256(typemax(Int128)) + Int256(1)
+    huge_den = Int256(2) * huge_num + Int256(1)
+    @test Qx64(Qx256(huge_num, huge_den)) == Qx64(1, 2)
+    @test Qx32(Qx256(huge_num, huge_den)) == Qx32(1, 2)
+
+    widened512_from32 = Qx512(raw32)
+    @test widened512_from32 == Qx512(3, 4)
+    @test widened512_from32.num == Int512(6)
+    @test widened512_from32.den == Int512(8)
+    @test convert(Qx512, Qx32(7, 3)) == Qx512(7, 3)
+    @test Qx512(Qx32(1, 0)) == Qx512(1, 0)
+    @test Qx512(Qx32(-1, 0)) == Qx512(-1, 0)
+    @test isnan(Qx512(Qx32(0, 0)))
+
+    widened512_from64 = Qx512(raw64)
+    @test widened512_from64 == Qx512(5, 7)
+    @test widened512_from64.num == Int512(10)
+    @test widened512_from64.den == Int512(14)
+    @test convert(Qx512, Qx64(7, 3)) == Qx512(7, 3)
+    @test Qx512(Qx64(1, 0)) == Qx512(1, 0)
+    @test Qx512(Qx64(-1, 0)) == Qx512(-1, 0)
+    @test isnan(Qx512(Qx64(0, 0)))
+
+    widened512_from128 = Qx512(raw128)
+    @test widened512_from128 == Qx512(5, 7)
+    @test widened512_from128.num == Int512(10)
+    @test widened512_from128.den == Int512(14)
+    @test convert(Qx512, Qx128(7, 3)) == Qx512(7, 3)
+    @test Qx512(Qx128(1, 0)) == Qx512(1, 0)
+    @test Qx512(Qx128(-1, 0)) == Qx512(-1, 0)
+    @test isnan(Qx512(Qx128(0, 0)))
+
+    raw256 = Qx256(10, 14)
+    widened512_from256 = Qx512(raw256)
+    @test widened512_from256 == Qx512(5, 7)
+    @test widened512_from256.num == Int512(10)
+    @test widened512_from256.den == Int512(14)
+    @test widen(Qx256) === Qx512
+    @test widen(raw256) == widened512_from256
+    @test convert(Qx512, Qx256(7, 3)) == Qx512(7, 3)
+    @test Qx512(Qx256(1, 0)) == Qx512(1, 0)
+    @test Qx512(Qx256(-1, 0)) == Qx512(-1, 0)
+    @test isnan(Qx512(Qx256(0, 0)))
+
+    @test Qx256(Qx512(7, 3)) == Qx256(7, 3)
+    @test Qx256(Qx512(1, Int512(typemax(Int256)) + 1)) == Qx256(1, typemax(Int256))
+    @test Qx256(Qx512(1, Int512(2) * Int512(typemax(Int256)) + 1)) == Qx256(0, 1)
+    @test Qx256(Qx512(Int512(typemax(Int256)) + 1, 1)) == Qx256(1, 0)
+    @test Qx256(Qx512(Int512(typemin(Int256)) - 1, 1)) == Qx256(-1, 0)
+    @test Qx256(Qx512(1, 0)) == Qx256(1, 0)
+    @test isnan(Qx256(Qx512(0, 0)))
+    @test convert(Qx256, Qx512(7, 3)) == Qx256(7, 3)
+
+    @test Qx128(Qx512(7, 3)) == Qx128(7, 3)
+    @test Qx128(Qx512(1, Int512(typemax(Int128)) + 1)) == Qx128(1, typemax(Int128))
+    @test Qx128(Qx512(1, Int512(2) * Int512(typemax(Int128)) + 1)) == Qx128(0, 1)
+    @test Qx128(Qx512(Int512(typemax(Int128)) + 1, 1)) == Qx128(1, 0)
+    @test Qx128(Qx512(Int512(typemin(Int128)) - 1, 1)) == Qx128(-1, 0)
+    @test Qx128(Qx512(1, 0)) == Qx128(1, 0)
+    @test isnan(Qx128(Qx512(0, 0)))
+    @test convert(Qx128, Qx512(7, 3)) == Qx128(7, 3)
+
+    @test Qx64(Qx512(7, 3)) == Qx64(7, 3)
+    @test Qx64(Qx512(1, Int512(typemax(Int64)) + 1)) == Qx64(1, typemax(Int64))
+    @test Qx64(Qx512(1, Int512(2) * Int512(typemax(Int64)) + 1)) == Qx64(0, 1)
+    @test Qx64(Qx512(Int512(typemax(Int64)) + 1, 1)) == Qx64(1, 0)
+    @test Qx64(Qx512(Int512(typemin(Int64)) - 1, 1)) == Qx64(-1, 0)
+    @test Qx64(Qx512(1, 0)) == Qx64(1, 0)
+    @test isnan(Qx64(Qx512(0, 0)))
+    @test convert(Qx64, Qx512(7, 3)) == Qx64(7, 3)
+
+    @test Qx32(Qx512(7, 3)) == Qx32(7, 3)
+    @test Qx32(Qx512(1, Int512(typemax(Int32)) + 1)) == Qx32(1, typemax(Int32))
+    @test Qx32(Qx512(1, Int512(2) * Int512(typemax(Int32)) + 1)) == Qx32(0, 1)
+    @test Qx32(Qx512(Int512(typemax(Int32)) + 1, 1)) == Qx32(1, 0)
+    @test Qx32(Qx512(Int512(typemin(Int32)) - 1, 1)) == Qx32(-1, 0)
+    @test Qx32(Qx512(1, 0)) == Qx32(1, 0)
+    @test isnan(Qx32(Qx512(0, 0)))
+    @test convert(Qx32, Qx512(7, 3)) == Qx32(7, 3)
+
+    huge_num512 = Int512(typemax(Int256)) + Int512(1)
+    huge_den512 = Int512(2) * huge_num512 + Int512(1)
+    @test Qx256(Qx512(huge_num512, huge_den512)) == Qx256(1, 2)
+    @test Qx128(Qx512(huge_num512, huge_den512)) == Qx128(1, 2)
 end
 
 @testset "Internal nearest Rational128 helper" begin
     @test XRationals._nearest_rational128(Int512(7) // Int512(3)) == Int128(7) // Int128(3)
     @test XRationals._nearest_rational128((Int512(typemax(Int128)) + Int512(1)) // Int512(1)) == typemax(Int128) // Int128(1)
     @test XRationals._nearest_rational128(Int512(1) // (Int512(2) * Int512(typemax(Int128)) + Int512(1))) == Int128(0) // Int128(1)
+end
+
+@testset "Internal nearest Rational256 helper" begin
+    @test XRationals._nearest_rational256(Int1024(7) // Int1024(3)) == Int256(7) // Int256(3)
+    @test XRationals._nearest_rational256((Int1024(typemax(Int256)) + Int1024(1)) // Int1024(1)) == typemax(Int256) // Int256(1)
+    @test XRationals._nearest_rational256(Int1024(1) // (Int1024(2) * Int1024(typemax(Int256)) + Int1024(1))) == Int256(0) // Int256(1)
 end

@@ -1,5 +1,6 @@
 using XRationals
 using Chairmarks
+using BitIntegers: Int256, Int512
 
 function fmt_ns(sample)
     ns = minimum(sample).time * 1e9
@@ -77,4 +78,20 @@ run_table(
     (n, d) -> Rational{Int128}(Int128(n), Int128(d)),
     (n, d) -> Qx128(n, d),
     "Qx128",
+)
+
+run_table(
+    "256-bit",
+    Int256,
+    (n, d) -> Rational{Int256}(Int256(n), Int256(d)),
+    (n, d) -> Qx256(n, d),
+    "Qx256",
+)
+
+run_table(
+    "512-bit",
+    Int512,
+    (n, d) -> Rational{Int512}(Int512(n), Int512(d)),
+    (n, d) -> Qx512(n, d),
+    "Qx512",
 )

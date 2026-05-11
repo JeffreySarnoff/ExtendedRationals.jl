@@ -11,11 +11,11 @@ Pkg.add("XRationals")
 
 ```text
 Do you need Inf/NaN support?
-├── No  → Rational{Int32}, Rational{Int64}, or Rational{Int128} (stdlib)
-└── Yes → Qx32, Qx64, or Qx128
+├── No  → Rational{Int32}, Rational{Int64}, Rational{Int128}, Rational{Int256}, or Rational{Int512}
+└── Yes → Qx32, Qx64, Qx128, Qx256, or Qx512
 ```
 
-**32-bit vs 64-bit vs 128-bit**: Use 32-bit types when values fit in Int32 range and you want compact storage or are memory-bound. Use 64-bit for the usual full-machine-width range. Use 128-bit when you need much larger exact numerators and denominators while keeping the same API. Qx32 is still the fastest type because Int32-backed arithmetic stays on the smallest widened intermediates.
+**32-bit vs 64-bit vs 128-bit vs 256-bit vs 512-bit**: Use 32-bit types when values fit in Int32 range and you want compact storage or are memory-bound. Use 64-bit for the usual full-machine-width range. Use 128-bit when you need much larger exact numerators and denominators. Use 256-bit when you need another large jump in exact finite range while keeping the same API. Use 512-bit when you need the widest fixed-width exported range and can afford slower multi-word arithmetic. Qx32 is still the fastest type because Int32-backed arithmetic stays on the smallest widened intermediates.
 
 ## Common patterns
 
@@ -87,6 +87,12 @@ Qx32(big_ratio)          # best Int32 approximation (near 1//1)
 wide128 = Qx128(1, Int128(2) * Int128(typemax(Int64)) + 1)
 Qx64(wide128)            # nearest Qx64, here 0//1
 Qx32(wide128)            # nearest Qx32, also 0//1
+
+wide256 = Qx256(wide128)
+Qx128(wide256)           # nearest Qx128, here still exact
+
+wide512 = Qx512(wide256)
+Qx256(wide512)           # nearest Qx256, here still exact
 ```
 
 ### Exact widening conversion
@@ -97,12 +103,18 @@ Widen a smaller extended rational exactly into a larger one:
 small32 = Qx32(6, 8)
 mid64 = Qx64(small32)    # exact widening, raw 6//8 layout preserved
 wide128 = Qx128(mid64)   # exact widening again
+wide256 = Qx256(wide128) # exact widening into Int256-backed storage
+wide512 = Qx512(wide256) # exact widening into Int512-backed storage
 same_mid64 = convert(Qx64, small32)  # same constructor-first widening semantics
 next_type = widen(Qx32)  # Qx64
 same_widened = widen(small32)  # same as Qx64(small32)
+widest_type = widen(Qx128)  # Qx256
+widest_exported_type = widen(Qx256)  # Qx512
 
 Qx128(Qx32(7, 3))        # 7//3
 Qx128(Qx64(1, 0))        # Inf
+Qx256(Qx128(7, 3))       # 7//3
+Qx512(Qx256(7, 3))       # 7//3
 ```
 
 ## Interoperability with stdlib Rational
@@ -121,11 +133,11 @@ Qx64(3.14)   # best Int64 rational approximation of pi
 
 ## Performance tips
 
-1. **Prefer Qx32/Qx64/Qx128** for chains of arithmetic. The GCD savings compound with every operation.
+1. **Prefer Qx32/Qx64/Qx128/Qx256/Qx512** for chains of arithmetic. The GCD savings compound with every operation.
 2. **Avoid accessing `numerator`/`denominator` in hot loops** — each call triggers normalization.
 3. **Use `muladd` instead of `fma`** unless you specifically need the exact intermediate guarantee. `muladd` is `x*y + z` with lazy normalization; `fma` must normalize first.
-4. **Qx32 is the fastest type** because Int32 intermediates use native Int64 arithmetic (single machine instruction), while Qx64 and Qx128 require progressively wider multi-word arithmetic.
-5. **Use Qx128 only when you need the extra range.** It preserves the API shape, but wider intermediates cost more than the 32- and 64-bit variants.
+4. **Qx32 is the fastest type** because Int32 intermediates use native Int64 arithmetic (single machine instruction), while Qx64, Qx128, Qx256, and Qx512 require progressively wider multi-word arithmetic.
+5. **Use Qx128, Qx256, or Qx512 only when you need the extra range.** They preserve the API shape, but wider intermediates cost more than the 32- and 64-bit variants.
 
 ## Benchmark harness
 
@@ -170,4 +182,26 @@ Representative local results from that harness:
 | `a+b+c+d` | 269 ns | 20 ns | 13.2x |
 | `a*b-c*d` | 216 ns | 17 ns | 12.5x |
 
-`fma` remains slower than stdlib `Rational` because it computes the exact widened intermediate before rounding back to the nearest fixed-width result. Use `muladd` when you want the faster lazy path.
+### Qx256 vs Rational{Int256}
+
+| Operation | Rational{Int256} | Qx256 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 267 ns | 23 ns | 11.4x |
+| `a * b` | 230 ns | 16 ns | 14.3x |
+| `a / b` | 208 ns | 19 ns | 11.1x |
+| `muladd(a,b,a)` | 438 ns | 38 ns | 11.4x |
+| `a+b+c+d` | 996 ns | 69 ns | 14.5x |
+| `a*b-c*d` | 791 ns | 53 ns | 14.8x |
+
+### Qx512 vs Rational{Int512}
+
+| Operation | Rational{Int512} | Qx512 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 583 ns | 93 ns | 6.3x |
+| `a * b` | 461 ns | 59 ns | 7.9x |
+| `a / b` | 417 ns | 64 ns | 6.5x |
+| `muladd(a,b,a)` | 941 ns | 156 ns | 6.0x |
+| `a+b+c+d` | 2.1 us | 310 ns | 6.8x |
+| `a*b-c*d` | 1.7 us | 222 ns | 7.9x |
+
+`fma` remains slower than stdlib `Rational` because it routes finite fused multiply-add through a slower exact-or-canonical path before converting back to the fixed-width result. Use `muladd` when you want the faster lazy path.

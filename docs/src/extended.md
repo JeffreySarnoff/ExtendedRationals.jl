@@ -1,6 +1,6 @@
-# Extended Rationals — Qx32 / Qx64 / Qx128
+# Extended Rationals — Qx32 / Qx64 / Qx128 / Qx256 / Qx512
 
-`XRational32` (`Qx32`), `XRational64` (`Qx64`), and `XRational128` (`Qx128`) combine IEEE-like special values with lazy GCD normalization for maximum throughput. Overflow saturates to Inf or NaN instead of throwing.
+`XRational32` (`Qx32`), `XRational64` (`Qx64`), `XRational128` (`Qx128`), `XRational256` (`Qx256`), and `XRational512` (`Qx512`) combine IEEE-like special values with lazy GCD normalization for maximum throughput. Overflow saturates to Inf or NaN instead of throwing.
 
 ## When to use
 
@@ -13,12 +13,12 @@
 - **3-13x faster than `Rational{Int}`** for chained arithmetic.
 - **Never throws on arithmetic**: overflow saturates to Inf/NaN, division by zero returns Inf.
 - **IEEE semantics**: NaN propagates, Inf arithmetic follows expected rules, NaN sorts last.
-- **Zero allocation**: Qx32 uses Int64 intermediates, Qx64 uses Int128, Qx128 uses Int256.
+- **Zero allocation**: Qx32 uses Int64 intermediates, Qx64 uses Int128, Qx128 uses Int256, Qx256 uses Int512, and Qx512 uses Int1024.
 - **Correct equality**: cross-multiplication comparison works without normalization.
 
 ## How lazy normalization works
 
-Standard rational types compute `gcd(|num|, den)` after every operation. Qx32/Qx64/Qx128 skip this step — they store the result with `den > 0` and correct sign, but may leave a common factor. Normalization happens only when needed:
+Standard rational types compute `gcd(|num|, den)` after every operation. Qx32/Qx64/Qx128/Qx256/Qx512 skip this step — they store the result with `den > 0` and correct sign, but may leave a common factor. Normalization happens only when needed:
 
 - **Display** (`show`, `print`): normalizes before printing.
 - **Hashing** (`hash`): normalizes so equal values hash identically.
@@ -47,6 +47,8 @@ using XRationals
 a = Qx32(2, 3)         # 2//3
 b = Qx64(355, 113)     # 355//113
 c = Qx128(170141183460469231731687303715884105727, 3)
+d = Qx256(7, 3)
+e = Qx512(7, 3)
 
 # Special values
 Qx32(1, 0)              # Inf
@@ -56,10 +58,13 @@ Qx32(0, 0)              # NaN
 # From floats
 Qx64(3.14)              # best Int64 rational approximation
 Qx128(3.14)             # best Int128 rational approximation
+Qx256(3.14)             # best Int256 rational approximation
+Qx512(3.14)             # best Int512 rational approximation
 
 # typemin is rejected
 Qx32(typemin(Int32), 1) # throws OverflowError
 Qx128(typemin(Int128), 1) # throws OverflowError
+Qx512(typemin(Int512), 1) # throws OverflowError
 ```
 
 ## Arithmetic with saturation
@@ -145,6 +150,8 @@ sort([Qx32(0, 0), Qx32(1, 1), Qx32(-1, 1)])   # [-1//1, 1//1, NaN]
 - Qx32: intermediate in Int64, result via Stern-Brocot in Int128
 - Qx64: intermediate in Int128, result via Stern-Brocot in Int256
 - Qx128: intermediate in Int256, result via Stern-Brocot in Int512/Int1024
+- Qx256: finite arguments are routed through `Rational{Int256}` and converted back into Qx256
+- Qx512: finite arguments are routed through `Rational{Int512}` and converted back into Qx512
 
 Use `muladd(x, y, z)` (which is just `x*y + z`) for the fast path when you don't need the exact intermediate guarantee.
 
@@ -166,19 +173,33 @@ narrow = Qx32(wide)      # 355//113 (fits exactly)
 raw32 = Qx32(6, 8)
 Qx64(raw32)              # exact widening, preserves the raw 6//8 storage
 Qx128(raw32)             # exact widening into Int128-backed storage
+Qx256(raw32)             # exact widening into Int256-backed storage
+Qx512(raw32)             # exact widening into Int512-backed storage
 Qx128(wide)              # exact widening from Qx64
+Qx256(wide)              # exact widening from Qx64
+Qx512(wide)              # exact widening from Qx64
+wide128 = Qx128(wide)
+Qx256(wide128)           # exact widening from Qx128
+Qx512(wide128)           # exact widening from Qx128
+wide256 = Qx256(wide128)
+Qx512(wide256)           # exact widening from Qx256
 convert(Qx64, raw32)     # same widening semantics as the constructor
 widen(Qx32)              # Qx64
 widen(raw32)             # same as Qx64(raw32)
 widen(Qx64)              # Qx128
 widen(wide)              # same as Qx128(wide)
+widen(Qx128)             # Qx256
+widen(wide128)           # same as Qx256(wide128)
+widen(Qx256)             # Qx512
+widen(wide256)           # same as Qx512(wide256)
 
 huge = Qx64(typemax(Int64), 1)
 Qx32(huge)                # Inf (saturates)
 
-wide128 = Qx128(wide)
 Qx64(Qx128(1, Int128(2) * Int128(typemax(Int64)) + 1))  # 0//1 (nearest Qx64)
 Qx32(Qx128(1, Int128(2) * Int128(typemax(Int32)) + 1))  # 0//1 (nearest Qx32)
+Qx128(Qx256(Qx128(7, 3)))                                # 7//3 (fits exactly)
+Qx256(Qx512(Qx256(7, 3)))                                # 7//3 (fits exactly)
 ```
 
 ## Performance
@@ -224,7 +245,29 @@ julia --project=. test/Benchmark.jl
 | `a+b+c+d` | 269 ns | 20 ns | 13.2x |
 | `a*b-c*d` | 216 ns | 17 ns | 12.5x |
 
-As in the README benchmark notes, `fma` is the exception: XRationals uses exact widened intermediates and rounds back to the nearest fixed-width result, so `muladd` is the faster choice when you do not need that guarantee.
+### Qx256 vs Rational{Int256}
+
+| Operation | Rational{Int256} | Qx256 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 267 ns | 23 ns | 11.4x |
+| `a * b` | 230 ns | 16 ns | 14.3x |
+| `a / b` | 208 ns | 19 ns | 11.1x |
+| `muladd(a,b,a)` | 438 ns | 38 ns | 11.4x |
+| `a+b+c+d` | 996 ns | 69 ns | 14.5x |
+| `a*b-c*d` | 791 ns | 53 ns | 14.8x |
+
+### Qx512 vs Rational{Int512}
+
+| Operation | Rational{Int512} | Qx512 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 583 ns | 93 ns | 6.3x |
+| `a * b` | 461 ns | 59 ns | 7.9x |
+| `a / b` | 417 ns | 64 ns | 6.5x |
+| `muladd(a,b,a)` | 941 ns | 156 ns | 6.0x |
+| `a+b+c+d` | 2.1 us | 310 ns | 6.8x |
+| `a*b-c*d` | 1.7 us | 222 ns | 7.9x |
+
+As in the README benchmark notes, `fma` is the exception: XRationals routes finite fused multiply-add through a slower exact-or-canonical path before converting back to the fixed-width result, so `muladd` is the faster choice when you do not need that guarantee.
 
 ## Width summary
 
@@ -233,6 +276,8 @@ As in the README benchmark notes, `fma` is the exception: XRationals uses exact 
 | `Qx32` | `Int32` | `Int64` | Small hot loops and compact storage |
 | `Qx64` | `Int64` | `Int128` | General-purpose exact rational work |
 | `Qx128` | `Int128` | `Int256` | Much larger finite range with the same IEEE-like semantics |
+| `Qx256` | `Int256` | `Int512` | Very large exact ranges with the same IEEE-like semantics |
+| `Qx512` | `Int512` | `Int1024` | Widest fixed-width exported range with the same IEEE-like semantics |
 
 ## Predicates
 
