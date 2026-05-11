@@ -1,6 +1,6 @@
-# Extended Rationals — Qx32 / Qx64
+# Extended Rationals — Qx32 / Qx64 / Qx128
 
-`XRational32` (`Qx32`) and `XRational64` (`Qx64`) combine IEEE-like special values with lazy GCD normalization for maximum throughput. Overflow saturates to Inf or NaN instead of throwing.
+`XRational32` (`Qx32`), `XRational64` (`Qx64`), and `XRational128` (`Qx128`) combine IEEE-like special values with lazy GCD normalization for maximum throughput. Overflow saturates to Inf or NaN instead of throwing.
 
 ## When to use
 
@@ -13,12 +13,12 @@
 - **3-13x faster than `Rational{Int}`** for chained arithmetic.
 - **Never throws on arithmetic**: overflow saturates to Inf/NaN, division by zero returns Inf.
 - **IEEE semantics**: NaN propagates, Inf arithmetic follows expected rules, NaN sorts last.
-- **Zero allocation**: Qx32 uses native Int64 intermediates, Qx64 uses Int128.
+- **Zero allocation**: Qx32 uses Int64 intermediates, Qx64 uses Int128, Qx128 uses Int256.
 - **Correct equality**: cross-multiplication comparison works without normalization.
 
 ## How lazy normalization works
 
-Standard rational types compute `gcd(|num|, den)` after every operation. Qx32/Qx64 skip this step — they store the result with `den > 0` and correct sign, but may leave a common factor. Normalization happens only when needed:
+Standard rational types compute `gcd(|num|, den)` after every operation. Qx32/Qx64/Qx128 skip this step — they store the result with `den > 0` and correct sign, but may leave a common factor. Normalization happens only when needed:
 
 - **Display** (`show`, `print`): normalizes before printing.
 - **Hashing** (`hash`): normalizes so equal values hash identically.
@@ -46,6 +46,7 @@ using XRationals
 
 a = Qx32(2, 3)         # 2//3
 b = Qx64(355, 113)     # 355//113
+c = Qx128(170141183460469231731687303715884105727, 3)
 
 # Special values
 Qx32(1, 0)              # Inf
@@ -54,9 +55,11 @@ Qx32(0, 0)              # NaN
 
 # From floats
 Qx64(3.14)              # best Int64 rational approximation
+Qx128(3.14)             # best Int128 rational approximation
 
 # typemin is rejected
 Qx32(typemin(Int32), 1) # throws OverflowError
+Qx128(typemin(Int128), 1) # throws OverflowError
 ```
 
 ## Arithmetic with saturation
@@ -72,6 +75,7 @@ a ^ 3    # 8//27
 # Overflow saturates
 Qx32(typemax(Int32), 1) + 1          # Inf
 Qx64(typemin(Int64) + 1, 1) - 1      # -Inf
+Qx128(typemax(Int128), 1) + 1        # Inf
 
 # Division by zero
 Qx32(1, 2) / Qx32(0, 1)             # Inf
@@ -140,6 +144,7 @@ sort([Qx32(0, 0), Qx32(1, 1), Qx32(-1, 1)])   # [-1//1, 1//1, NaN]
 
 - Qx32: intermediate in Int64, result via Stern-Brocot in Int128
 - Qx64: intermediate in Int128, result via Stern-Brocot in Int256
+- Qx128: intermediate in Int256, result via Stern-Brocot in Int512/Int1024
 
 Use `muladd(x, y, z)` (which is just `x*y + z`) for the fast path when you don't need the exact intermediate guarantee.
 
@@ -152,14 +157,28 @@ muladd(Qx32(2, 3), Qx32(3, 4), Qx32(1, 2)) # 1//1
 
 ## Cross-width conversion
 
-Convert Qx64 to Qx32 with best rational approximation:
+Widen smaller extended rationals exactly through constructor-first APIs, or narrow wider ones to the nearest representable smaller type. `widen` exposes the same widening ladder at the type and value levels.
 
 ```julia
 wide = Qx64(355, 113)
 narrow = Qx32(wide)      # 355//113 (fits exactly)
 
+raw32 = Qx32(6, 8)
+Qx64(raw32)              # exact widening, preserves the raw 6//8 storage
+Qx128(raw32)             # exact widening into Int128-backed storage
+Qx128(wide)              # exact widening from Qx64
+convert(Qx64, raw32)     # same widening semantics as the constructor
+widen(Qx32)              # Qx64
+widen(raw32)             # same as Qx64(raw32)
+widen(Qx64)              # Qx128
+widen(wide)              # same as Qx128(wide)
+
 huge = Qx64(typemax(Int64), 1)
 Qx32(huge)                # Inf (saturates)
+
+wide128 = Qx128(wide)
+Qx64(Qx128(1, Int128(2) * Int128(typemax(Int64)) + 1))  # 0//1 (nearest Qx64)
+Qx32(Qx128(1, Int128(2) * Int128(typemax(Int32)) + 1))  # 0//1 (nearest Qx32)
 ```
 
 ## Performance
@@ -168,21 +187,25 @@ Typical speedups over `Rational{Int}` (minimum nanoseconds, zero allocations):
 
 ### Qx32 vs Rational{Int32}
 
-| Operation | `Rational{Int32}` | `Qx32` | Speedup |
-| --------- | ----------------- | ------- | ------- |
-| a + b     | 13 ns             | 2 ns    | 6.5x    |
-| a * b     | 8 ns              | 2 ns    | 4x      |
-| a+b+c+d   | 66 ns             | 5 ns    | 13x     |
-| a*b-c*d   | 37 ns             | 4 ns    | 9x      |
+- `a + b`: `Rational{Int32}` 13 ns, `Qx32` 2 ns, about 6.5x faster
+- `a * b`: `Rational{Int32}` 8 ns, `Qx32` 2 ns, about 4x faster
+- `a+b+c+d`: `Rational{Int32}` 66 ns, `Qx32` 5 ns, about 13x faster
+- `a*b-c*d`: `Rational{Int32}` 37 ns, `Qx32` 4 ns, about 9x faster
 
 ### Qx64 vs Rational{Int64}
 
-| Operation | `Rational{Int64}` | `Qx64` | Speedup |
-| --------- | ----------------- | ------- | ------- |
-| a + b     | 14 ns             | 3 ns    | 5x      |
-| a * b     | 8 ns              | 2 ns    | 4x      |
-| a+b+c+d   | 72 ns             | 8 ns    | 9x      |
-| a*b-c*d   | 41 ns             | 5 ns    | 8x      |
+- `a + b`: `Rational{Int64}` 14 ns, `Qx64` 3 ns, about 5x faster
+- `a * b`: `Rational{Int64}` 8 ns, `Qx64` 2 ns, about 4x faster
+- `a+b+c+d`: `Rational{Int64}` 72 ns, `Qx64` 8 ns, about 9x faster
+- `a*b-c*d`: `Rational{Int64}` 41 ns, `Qx64` 5 ns, about 8x faster
+
+## Width summary
+
+| Type | Backing | Lazy arithmetic intermediates | Best fit for |
+| ---- | ------- | ----------------------------- | ------------ |
+| `Qx32` | `Int32` | `Int64` | Small hot loops and compact storage |
+| `Qx64` | `Int64` | `Int128` | General-purpose exact rational work |
+| `Qx128` | `Int128` | `Int256` | Much larger finite range with the same IEEE-like semantics |
 
 ## Predicates
 

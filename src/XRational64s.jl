@@ -1,7 +1,6 @@
 module XRational64s
 
-include("Rational64s.jl")
-using .Rational64s: Rational64
+const Rational64 = Rational{Int64}
 
 #===
 Public type — lazy normalization

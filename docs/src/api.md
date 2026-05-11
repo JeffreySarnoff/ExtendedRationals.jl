@@ -6,6 +6,7 @@
 | ---- | ----- | ----------- |
 | `XRational32` | `Qx32` | Extended rational with Inf/NaN, lazy normalization, Int64 intermediates |
 | `XRational64` | `Qx64` | Extended rational with Inf/NaN, lazy normalization, Int128 intermediates |
+| `XRational128` | `Qx128` | Extended rational with Inf/NaN, lazy normalization, Int256 intermediates |
 
 ### Internal types (not exported)
 
@@ -13,6 +14,7 @@
 | ---- | ----------- |
 | `Rational32` | Strict exact rational, Int32-backed, throws on overflow |
 | `Rational64` | Strict exact rational, Int64-backed, throws on overflow |
+| `Rational128` | Strict exact rational, Int128-backed, throws on overflow |
 
 ## Constructors
 
@@ -25,7 +27,7 @@ T(float)            # best rational approximation
 T(x::Rational{<:Integer})  # from stdlib Rational
 ```
 
-`typemin(Int32)` and `typemin(Int64)` are rejected in both numerator and denominator positions to prevent silent negation overflow.
+`typemin(Int32)`, `typemin(Int64)`, and `typemin(Int128)` are rejected in both numerator and denominator positions to prevent silent negation overflow.
 
 ## Special values (Qx types only)
 
@@ -46,7 +48,7 @@ Module-local constructors (not exported, accessed via submodule):
 
 The table below shows every implemented operation and which type families support it.
 
-**Legend**: Q = Rational32/Rational64 (internal), Qx = Qx32/Qx64
+**Legend**: Q = Rational32/Rational64/Rational128 (internal), Qx = Qx32/Qx64/Qx128
 
 ### Construction and identity
 
@@ -80,7 +82,7 @@ The table below shows every implemented operation and which type families suppor
 | `x / y` | Y | Y | Division |
 | `x ^ p` | Y | Y | Integer exponentiation |
 
-All binary operations also accept mixed arguments with `Integer` and the corresponding strict `Rational` type (e.g., `Qx32 + Int`, `Qx64 * Rational64`).
+All binary operations also accept mixed arguments with `Integer` and the corresponding strict `Rational` type (e.g., `Qx32 + Int`, `Qx64 * Rational64`, `Qx128 * Rational128`).
 
 ### Fused multiply-add
 
@@ -93,6 +95,7 @@ Intermediate precision by type:
 
 - Rational32/Qx32: `x*y` computed in Int64, result via Stern-Brocot in Int128
 - Rational64/Qx64: `x*y` computed in Int128, result via Stern-Brocot in Int256
+- Rational128/Qx128: `x*y` computed with wider fixed-width arithmetic, result via Stern-Brocot in Int512/Int1024
 
 ### Quotient and remainder
 
@@ -180,10 +183,20 @@ Qx types use cross-multiplication for comparison — no normalization required.
 
 ### Cross-width conversion
 
+Exact widening is constructor-first in the public API. The corresponding `convert` methods delegate to the same widening semantics, and `widen` follows the same type ladder.
+
 | Operation | Description |
 | --------- | ----------- |
 | `Qx32(x::Qx64)` | Narrow Qx64 to Qx32 via Stern-Brocot best approximation |
-| `Qx64(x::Qx32)` | Widen Qx32 to Qx64 (exact) |
+| `Qx32(x::Qx128)` | Narrow Qx128 to Qx32 via Stern-Brocot best approximation |
+| `Qx64(x::Qx32)` | Widen Qx32 to Qx64 exactly |
+| `Qx64(x::Qx128)` | Narrow Qx128 to Qx64 via Stern-Brocot best approximation |
+| `Qx128(x::Qx32)` | Widen Qx32 to Qx128 exactly |
+| `Qx128(x::Qx64)` | Widen Qx64 to Qx128 exactly |
+| `widen(Qx32)` | Return `Qx64` as the next wider extended rational type |
+| `widen(Qx64)` | Return `Qx128` as the next wider extended rational type |
+| `widen(x::Qx32)` | Widen a Qx32 value to Qx64 |
+| `widen(x::Qx64)` | Widen a Qx64 value to Qx128 |
 
 ### Hashing and display
 

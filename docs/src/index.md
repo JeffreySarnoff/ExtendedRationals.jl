@@ -4,19 +4,25 @@ Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overfl
 
 ## Overview
 
-XRationals.jl provides four rational number types in two families:
+XRationals.jl is built for exact rational arithmetic when you want fixed-width performance characteristics instead of arbitrary-precision growth. The package keeps numerators and denominators in compact integer fields, avoids heap allocation in normal arithmetic, and offers a predictable overflow story for each family of types.
 
-| Type | Alias | Backing | Overflow | Normalization |
-| :---- | :----- | :------- | :-------- | :------------- |
-| `XRational32` | `Qx32` | `Int32` | Saturates to Inf/NaN | Lazy (Int64 intermediate) |
-| `XRational64` | `Qx64` | `Int64` | Saturates to Inf/NaN | Lazy (Int128 intermediate) |
-| `Rational32` | *(internal)* | `Int32` | Throws `OverflowError` | Eager (always canonical) |
-| `Rational64` | *(internal)* | `Int64` | Throws `OverflowError` | Eager (always canonical) |
+The exported `Qx` types are the practical front door for most users: they preserve exact rational semantics while adding IEEE-like `Inf`, `-Inf`, and `NaN` values plus lazy normalization for faster chained operations. Alongside them, the internal strict `Rational32`, `Rational64`, and `Rational128` types provide the same width-specific API shape but throw immediately on overflow and always stay in canonical form.
+
+XRationals.jl provides six rational number types in two families:
+
+| Type | Int | Overflow | Normalization |
+| :--- | :-- | :------- | :------------- |
+| `XRational32` (`Qx32`) | `Int32` | Saturates | Lazy via `Int64` |
+| `XRational64` (`Qx64`) | `Int64` | Saturates | Lazy via `Int128` |
+| `XRational128` (`Qx128`) | `Int128` | Saturates | Lazy via `Int256` |
+| `Rational32` | `Int32` | Throws | Eager |
+| `Rational64` | `Int64` | Throws | Eager |
+| `Rational128` | `Int128` | Throws | Eager |
 
 ## Choosing a type
 
-- **Need IEEE-like robustness and speed?** Use `Qx32` / `Qx64`. Overflow saturates to Inf/NaN, and lazy normalization gives 3-13x speedups over `Rational{Int}` for chained arithmetic.
-- **Need strict error detection?** `Rational32` / `Rational64` are available internally. Overflow throws immediately.
+- **Need IEEE-like robustness and speed?** Use `Qx32`, `Qx64`, or `Qx128`. Overflow saturates to Inf/NaN, and lazy normalization gives strong speedups over `Rational{Int}` for chained arithmetic.
+- **Need strict error detection?** `Rational32`, `Rational64`, and `Rational128` are available internally. Overflow throws immediately.
 
 ## Quick start
 
@@ -44,16 +50,17 @@ Qx64(6, 8) == Qx64(3, 4)   # true (cross-multiply comparison)
 
 ## Key features
 
-- **Zero heap allocation**: all arithmetic uses fixed-width integers (Int32/Int64/Int128/Int256)
+- **Zero heap allocation**: all arithmetic uses fixed-width integers (Int32/Int64/Int128/Int256/Int512/Int1024)
+- **Broader width coverage**: choose 32-, 64-, or 128-bit strict and extended rationals from the same API shape
 - **Lazy normalization**: GCD is deferred until display, hashing, or conversion
-- **`typemin` rejection**: constructors reject `typemin(Int32)` and `typemin(Int64)` to prevent silent negation overflow
+- **`typemin` rejection**: constructors reject `typemin(Int32)`, `typemin(Int64)`, and `typemin(Int128)` to prevent silent negation overflow
 - **Fused multiply-add**: `fma(x, y, z)` computes `x*y + z` with exact intermediate precision
-- **Cross-width conversion**: `Qx32(x::Qx64)` finds the best Int32 approximation via Stern-Brocot mediants
+- **Cross-width conversion**: exact widening constructors (`Qx64(x::Qx32)`, `Qx128(x::Qx32)`, `Qx128(x::Qx64)`) are the canonical widening APIs and preserve value, `widen(Qx32) == Qx64` and `widen(Qx64) == Qx128` expose the same widening ladder, and `Qx64(x::Qx128)`, `Qx32(x::Qx128)`, and `Qx32(x::Qx64)` compute the nearest representable narrower value
 - **IEEE ordering**: NaN sorts last, Inf/-Inf compare correctly
 
 ## Pages
 
-- [Extended Rationals (Qx32/Qx64)](extended.md)
-- [Strict Rationals (Rational32/Rational64)](strict.md)
+- [Extended Rationals (Qx32/Qx64/Qx128)](extended.md)
+- [Strict Rationals (Rational32/Rational64/Rational128)](strict.md)
 - [Usage Guide](guide.md)
 - [API Reference](api.md)

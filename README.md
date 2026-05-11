@@ -13,17 +13,23 @@ Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overfl
 | ------ | ------- | --------- | ------------------- | ------------- |
 | `XRational32` | `Qx32` | `Int32` | Saturates to Inf/NaN | Lazy (Int64 intermediate) |
 | `XRational64` | `Qx64` | `Int64` | Saturates to Inf/NaN | Lazy (Int128 intermediate) |
+| `XRational128` | `Qx128` | `Int128` | Saturates to Inf/NaN | Lazy (Int256 intermediate) |
+| `Rational32` | *(internal)* | `Int32` | Throws `OverflowError` | Eager (always canonical) |
+| `Rational64` | *(internal)* | `Int64` | Throws `OverflowError` | Eager (always canonical) |
+| `Rational128` | *(internal)* | `Int128` | Throws `OverflowError` | Eager (always canonical) |
 
 ## Features
 
 - Exact rational arithmetic with no floating-point rounding
 - IEEE-like NaN, Inf, -Inf encoded in the same struct (`0//0`, `1//0`, `-1//0`)
 - Overflow saturates to Inf/NaN instead of crashing (Qx types)
+- Strict fixed-width rationals (`Rational32`, `Rational64`, `Rational128`) that throw on overflow
 - Lazy GCD normalization: deferred until display, hashing, or conversion
 - 3-13x faster than `Rational{Int}` for chained arithmetic
 - Fused multiply-add (`fma`) with exact intermediate computation
-- Cross-width conversion (Qx64 to Qx32) via best rational approximation
-- Zero heap allocation: all arithmetic uses fixed-width integers (Int32/Int64/Int128/Int256)
+- Cross-width narrowing (`Qx128 -> Qx64`, `Qx128 -> Qx32`, `Qx64 -> Qx32`) via best rational approximation
+- Exact widening across exported extended types through constructor-first APIs (`Qx64(x::Qx32)`, `Qx128(x::Qx32)`, `Qx128(x::Qx64)`), with `convert` and `widen` following the same width ladder
+- Zero heap allocation: all arithmetic uses fixed-width integers (Int32/Int64/Int128/Int256/Int512/Int1024)
 - `typemin` rejection prevents silent negation overflow
 
 ## Examples
@@ -32,9 +38,9 @@ See Use.jl for examples.
 
 ## Benchmarks
 
-All operations are zero-allocation unless noted. Times are minimum nanoseconds. 
+All operations are zero-allocation unless noted. Times are minimum nanoseconds.
 
-Note: the fma for Qx32 and Qx64 returns the nearest rational to the true value.  Rational{Int32} and Rational{Int64} just perform a muladd.  This is the reason for slowdown in that function.  You can use muladd with Qx32 and Qx64 for improved performance.
+Note: the `fma` for `Qx32`, `Qx64`, `Qx128`, `Rational32`, `Rational64`, and `Rational128` returns the nearest representable fixed-width rational to the true value. Stdlib `Rational{Int}` just performs a `muladd`. This is the reason for slowdown in that function. You can use `muladd` with the fixed-width XRationals types for improved performance.
 
 ### 32-bit
 

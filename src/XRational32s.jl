@@ -1,7 +1,6 @@
 module XRational32s
 
-include("Rational32s.jl")
-using .Rational32s: Rational32, _nearest_rational32
+const Rational32 = Rational{Int32}
 
 #===
 Public type — lazy normalization
