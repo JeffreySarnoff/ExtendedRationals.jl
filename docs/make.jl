@@ -15,7 +15,6 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
-        "Strict Rationals (Rational32/Rational64/Rational128)" => "strict.md",
         "Extended Rationals (Qx32/Qx64/Qx128)" => "extended.md",
         "Usage Guide" => "guide.md",
         "API Reference" => "api.md",

@@ -196,7 +196,6 @@ Base.convert(::Type{XRational64}, x::Rational{<:Integer}) = XRational64(x)
 Base.convert(::Type{Float64}, x::XRational64) = isnan(x) ? Base.NaN : isinf(x) ? (x.num > 0 ? Base.Inf : -Base.Inf) : Float64(x.num) / Float64(x.den)
 Base.convert(::Type{Float32}, x::XRational64) = isnan(x) ? Float32(Base.NaN) : isinf(x) ? (x.num > 0 ? Float32(Base.Inf) : Float32(-Base.Inf)) : Float32(x.num) / Float32(x.den)
 Base.convert(::Type{BigFloat}, x::XRational64) = isnan(x) ? BigFloat(Base.NaN) : isinf(x) ? (x.num > 0 ? BigFloat(Base.Inf) : BigFloat(-Base.Inf)) : BigFloat(x.num) / BigFloat(x.den)
-Base.convert(::Type{Rational64}, x::XRational64) = isfinite(x) ? _finite64(x) : throw(InexactError(:convert, Rational64, x))
 Base.convert(::Type{Rational{Int64}}, x::XRational64) = isfinite(x) ? (numerator(x) // denominator(x)) : throw(InexactError(:convert, Rational{Int64}, x))
 
 Base.Float32(x::XRational64) = convert(Float32, x)

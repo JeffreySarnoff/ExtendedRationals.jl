@@ -8,17 +8,9 @@
 | `XRational64` | `Qx64` | Extended rational with Inf/NaN, lazy normalization, Int128 intermediates |
 | `XRational128` | `Qx128` | Extended rational with Inf/NaN, lazy normalization, Int256 intermediates |
 
-### Internal types (not exported)
-
-| Type | Description |
-| ---- | ----------- |
-| `Rational32` | Strict exact rational, Int32-backed, throws on overflow |
-| `Rational64` | Strict exact rational, Int64-backed, throws on overflow |
-| `Rational128` | Strict exact rational, Int128-backed, throws on overflow |
-
 ## Constructors
 
-All types share the same two-argument constructor pattern:
+The exported `Qx` types share the same constructor pattern:
 
 ```julia
 T(numerator, denominator)
@@ -46,140 +38,136 @@ Module-local constructors (not exported, accessed via submodule):
 
 ## Complete operation list
 
-The table below shows every implemented operation and which type families support it.
-
-**Legend**: Q = Rational32/Rational64/Rational128 (internal), Qx = Qx32/Qx64/Qx128
+The tables below describe the public `Qx32`, `Qx64`, and `Qx128` API.
 
 ### Construction and identity
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `T(num, den)` | Y | Y | Construct from numerator and denominator |
-| `T(integer)` | Y | Y | Construct from integer (den = 1) |
-| `T(float)` | Y | Y | Best rational approximation of float |
-| `T(::Rational)` | Y | Y | Convert from stdlib Rational |
-| `zero(T)` / `zero(x)` | Y | Y | Additive identity `0//1` |
-| `one(T)` / `one(x)` | Y | Y | Multiplicative identity `1//1` |
-| `typemin(T)` | Y | Y | Minimum value (Q: smallest finite; Qx: -Inf) |
-| `typemax(T)` | Y | Y | Maximum value (Q: largest finite; Qx: +Inf) |
+| Operation | Description |
+| --------- | ----------- |
+| `T(num, den)` | Construct from numerator and denominator |
+| `T(integer)` | Construct from integer (den = 1) |
+| `T(float)` | Best rational approximation of float |
+| `T(::Rational)` | Convert from stdlib Rational |
+| `zero(T)` / `zero(x)` | Additive identity `0//1` |
+| `one(T)` / `one(x)` | Multiplicative identity `1//1` |
+| `typemin(T)` | `-Inf` |
+| `typemax(T)` | `+Inf` |
 
 ### Unary arithmetic
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `-x` | Y | Y | Negation |
-| `abs(x)` | Y | Y | Absolute value |
-| `inv(x)` | Y | Y | Multiplicative inverse `den//num` |
-| `sign(x)` | Y | Y | Sign: -1, 0, or 1 (as rational) |
+| Operation | Description |
+| --------- | ----------- |
+| `-x` | Negation |
+| `abs(x)` | Absolute value |
+| `inv(x)` | Multiplicative inverse `den//num` |
+| `sign(x)` | Sign: -1, 0, or 1 (as rational) |
 
 ### Binary arithmetic
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `x + y` | Y | Y | Addition |
-| `x - y` | Y | Y | Subtraction |
-| `x * y` | Y | Y | Multiplication |
-| `x / y` | Y | Y | Division |
-| `x ^ p` | Y | Y | Integer exponentiation |
+| Operation | Description |
+| --------- | ----------- |
+| `x + y` | Addition |
+| `x - y` | Subtraction |
+| `x * y` | Multiplication |
+| `x / y` | Division |
+| `x ^ p` | Integer exponentiation |
 
-All binary operations also accept mixed arguments with `Integer` and the corresponding strict `Rational` type (e.g., `Qx32 + Int`, `Qx64 * Rational64`, `Qx128 * Rational128`).
+All binary operations also accept mixed arguments with `Integer` and stdlib `Rational` values.
 
 ### Fused multiply-add
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `fma(x, y, z)` | Y | Y | Exact intermediate `x*y`, then nearest representable `x*y + z` |
-| `muladd(x, y, z)` | Y | Y | `x*y + z` (Q: exact; Qx: lazy, no normalization) |
+| Operation | Description |
+| --------- | ----------- |
+| `fma(x, y, z)` | Exact intermediate `x*y`, then nearest representable `x*y + z` |
+| `muladd(x, y, z)` | `x*y + z` with the normal lazy arithmetic path |
 
 Intermediate precision by type:
 
-- Rational32/Qx32: `x*y` computed in Int64, result via Stern-Brocot in Int128
-- Rational64/Qx64: `x*y` computed in Int128, result via Stern-Brocot in Int256
-- Rational128/Qx128: `x*y` computed with wider fixed-width arithmetic, result via Stern-Brocot in Int512/Int1024
+- Qx32: `x*y` computed in Int64, result via Stern-Brocot in Int128
+- Qx64: `x*y` computed in Int128, result via Stern-Brocot in Int256
+- Qx128: `x*y` computed with wider fixed-width arithmetic, result via Stern-Brocot in Int512/Int1024
 
 ### Quotient and remainder
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `rem(x, y)` | Y | Y | Remainder (truncated division) |
-| `mod(x, y)` | Y | Y | Modulus (floored division) |
-| `fld(x, y)` | Y | Y | Floored quotient |
-| `cld(x, y)` | Y | Y | Ceiled quotient |
-| `divrem(x, y)` | Y | Y | Truncated quotient and remainder |
-| `fldmod(x, y)` | Y | Y | Floored quotient and modulus |
-| `fldmod1(x, y)` | Y | Y | 1-based floored quotient and modulus |
+| Operation | Description |
+| --------- | ----------- |
+| `rem(x, y)` | Remainder (truncated division) |
+| `mod(x, y)` | Modulus (floored division) |
+| `fld(x, y)` | Floored quotient |
+| `cld(x, y)` | Ceiled quotient |
+| `divrem(x, y)` | Truncated quotient and remainder |
+| `fldmod(x, y)` | Floored quotient and modulus |
+| `fldmod1(x, y)` | 1-based floored quotient and modulus |
 
 For Qx types: returns NaN if either argument is NaN/Inf, or if divisor is zero. For `fld`, `cld`, `divrem`, `fldmod1`: throws `DomainError` on invalid arguments.
 
 ### Sign operations
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `signbit(x)` | Y | Y | `true` if numerator is negative |
-| `sign(x)` | Y | Y | Returns -1//1, 0//1, or 1//1 |
-| `copysign(x, y)` | Y | Y | `x` with the sign of `y` |
-| `flipsign(x, y)` | Y | Y | `x` with sign flipped if `y` is negative |
+| Operation | Description |
+| --------- | ----------- |
+| `signbit(x)` | `true` if numerator is negative |
+| `sign(x)` | Returns -1//1, 0//1, or 1//1 |
+| `copysign(x, y)` | `x` with the sign of `y` |
+| `flipsign(x, y)` | `x` with sign flipped if `y` is negative |
 
 ### Predicates
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `isfinite(x)` | - | Y | `true` if not Inf and not NaN |
-| `isinf(x)` | - | Y | `true` if +Inf or -Inf |
-| `isnan(x)` | - | Y | `true` if NaN |
-| `iszero(x)` | Y | Y | `true` if `x == 0` |
-| `isone(x)` | Y | Y | `true` if `x == 1` |
-| `isinteger(x)` | Y | Y | `true` if denominator divides numerator |
-
-Q types are always finite, so `isfinite`/`isinf`/`isnan` are not needed.
+| Operation | Description |
+| --------- | ----------- |
+| `isfinite(x)` | `true` if not Inf and not NaN |
+| `isinf(x)` | `true` if +Inf or -Inf |
+| `isnan(x)` | `true` if NaN |
+| `iszero(x)` | `true` if `x == 0` |
+| `isone(x)` | `true` if `x == 1` |
+| `isinteger(x)` | `true` if denominator divides numerator |
 
 ### Comparison and ordering
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `x == y` | Y | Y | Equality (NaN != NaN) |
-| `x < y` | Y | Y | Strict less-than (NaN returns false) |
-| `x <= y` | Y | Y | Less-than-or-equal (NaN returns false) |
-| `x > y` | Y | Y | Strict greater-than |
-| `x >= y` | Y | Y | Greater-than-or-equal |
-| `isless(x, y)` | Y | Y | Total order (NaN sorts last) |
+| Operation | Description |
+| --------- | ----------- |
+| `x == y` | Equality (NaN != NaN) |
+| `x < y` | Strict less-than (NaN returns false) |
+| `x <= y` | Less-than-or-equal (NaN returns false) |
+| `x > y` | Strict greater-than |
+| `x >= y` | Greater-than-or-equal |
+| `isless(x, y)` | Total order (NaN sorts last) |
 
 Qx types use cross-multiplication for comparison — no normalization required.
 
 ### Component access
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `numerator(x)` | Y | Y | Canonical numerator (Qx: triggers normalization) |
-| `denominator(x)` | Y | Y | Canonical denominator (Qx: triggers normalization) |
+| Operation | Description |
+| --------- | ----------- |
+| `numerator(x)` | Canonical numerator (triggers normalization) |
+| `denominator(x)` | Canonical denominator (triggers normalization) |
 
 ### Rounding
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `round(T, x)` | Y | Y | Round to nearest integer of type `T` |
-| `trunc(T, x)` | Y | Y | Truncate toward zero |
-| `trunc(x)` | - | Y | Truncate, returning same rational type |
-| `floor(T, x)` | Y | Y | Round down to integer of type `T` |
-| `floor(x)` | - | Y | Floor, returning same rational type |
-| `ceil(T, x)` | Y | Y | Round up to integer of type `T` |
-| `ceil(x)` | - | Y | Ceil, returning same rational type |
+| Operation | Description |
+| --------- | ----------- |
+| `round(T, x)` | Round to nearest integer of type `T` |
+| `trunc(T, x)` | Truncate toward zero |
+| `trunc(x)` | Truncate, returning the same rational type |
+| `floor(T, x)` | Round down to integer of type `T` |
+| `floor(x)` | Floor, returning the same rational type |
+| `ceil(T, x)` | Round up to integer of type `T` |
+| `ceil(x)` | Ceil, returning the same rational type |
 
 ### Type conversion
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `convert(Float64, x)` | Y | Y | Convert to Float64 |
-| `convert(Float32, x)` | Y | Y | Convert to Float32 |
-| `convert(BigFloat, x)` | Y | Y | Convert to BigFloat |
-| `convert(Rational{T}, x)` | - | Y | Convert to stdlib Rational (throws on Inf/NaN) |
-| `float(x)` | Y | Y | Convert to default float (Float64) |
+| Operation | Description |
+| --------- | ----------- |
+| `convert(Float64, x)` | Convert to Float64 |
+| `convert(Float32, x)` | Convert to Float32 |
+| `convert(BigFloat, x)` | Convert to BigFloat |
+| `convert(Rational{T}, x)` | Convert to stdlib Rational (throws on Inf/NaN) |
+| `float(x)` | Convert to default float (`Float64`) |
 
 ### Type promotion
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `promote_rule` | Y | Y | Promotion with Integer and corresponding Rational |
+| Operation | Description |
+| --------- | ----------- |
+| `promote_rule` | Promotion with `Integer` and stdlib `Rational` |
 
 ### Cross-width conversion
 
@@ -200,7 +188,7 @@ Exact widening is constructor-first in the public API. The corresponding `conver
 
 ### Hashing and display
 
-| Operation | Q | Qx | Description |
-| --------- | - | -- | ----------- |
-| `hash(x, h)` | Y | Y | Hash value (Qx: normalizes first) |
-| `show(io, x)` | Y | Y | Display (Qx: normalizes before printing) |
+| Operation | Description |
+| --------- | ----------- |
+| `hash(x, h)` | Hash value (normalizes first) |
+| `show(io, x)` | Display (normalizes before printing) |

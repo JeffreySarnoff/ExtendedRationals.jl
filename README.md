@@ -14,16 +14,12 @@ Exact rational arithmetic with IEEE-like special values (NaN, Inf, -Inf), overfl
 | `XRational32` | `Qx32` | `Int32` | Saturates to Inf/NaN | Lazy (Int64 intermediate) |
 | `XRational64` | `Qx64` | `Int64` | Saturates to Inf/NaN | Lazy (Int128 intermediate) |
 | `XRational128` | `Qx128` | `Int128` | Saturates to Inf/NaN | Lazy (Int256 intermediate) |
-| `Rational32` | *(internal)* | `Int32` | Throws `OverflowError` | Eager (always canonical) |
-| `Rational64` | *(internal)* | `Int64` | Throws `OverflowError` | Eager (always canonical) |
-| `Rational128` | *(internal)* | `Int128` | Throws `OverflowError` | Eager (always canonical) |
 
 ## Features
 
 - Exact rational arithmetic with no floating-point rounding
 - IEEE-like NaN, Inf, -Inf encoded in the same struct (`0//0`, `1//0`, `-1//0`)
 - Overflow saturates to Inf/NaN instead of crashing (Qx types)
-- Strict fixed-width rationals (`Rational32`, `Rational64`, `Rational128`) that throw on overflow
 - Lazy GCD normalization: deferred until display, hashing, or conversion
 - 3-13x faster than `Rational{Int}` for chained arithmetic
 - Fused multiply-add (`fma`) with exact intermediate computation
@@ -38,68 +34,47 @@ See Use.jl for examples.
 
 ## Benchmarks
 
-All operations are zero-allocation unless noted. Times are minimum nanoseconds.
+The package includes a runnable benchmark harness at `test/Benchmark.jl`:
 
-Note: the `fma` for `Qx32`, `Qx64`, `Qx128`, `Rational32`, `Rational64`, and `Rational128` returns the nearest representable fixed-width rational to the true value. Stdlib `Rational{Int}` just performs a `muladd`. This is the reason for slowdown in that function. You can use `muladd` with the fixed-width XRationals types for improved performance.
+```julia
+julia --project=. test/Benchmark.jl
+```
 
-### 32-bit
+It compares `Qx32`, `Qx64`, and `Qx128` against stdlib `Rational{Int32}`, `Rational{Int64}`, and `Rational{Int128}` using `Chairmarks`.
 
-| Operation | `Rational{Int32}` | `Qx32` |
-| --- | --- | --- |
-| construct(7,3) | 1 ns | 1 ns |
-| a + b | 13 ns | 2 ns |
-| a - b | 13 ns | 2 ns |
-| a * b | 8 ns | 2 ns |
-| a / b | 7 ns | 2 ns |
-| -a | 1 ns | 1 ns |
-| a < b | 1 ns | 2 ns |
-| a == b | 1 ns | 1 ns |
-| abs(-a) | 1 ns | 2 ns |
-| inv(a) | 1 ns | 2 ns |
-| a ^ 3 | 18 ns | 5 ns |
-| a+b+c+d | 66 ns | 4 ns |
-| a*b-c*d | 37 ns | 4 ns |
-| muladd(a,b,a) | 23 ns | 3 ns |
-| fma(a,b,a) | 23 ns | 215 ns |
+Representative local results from that harness:
 
-### 64-bit
+### Qx32 vs Rational{Int32}
 
-| Operation | `Rational{Int64}` | `Qx64` |
-| --- | --- | --- |
-| construct(7,3) | 1 ns | 1 ns |
-| a + b | 14 ns | 3 ns |
-| a - b | 15 ns | 3 ns |
-| a * b | 8 ns | 2 ns |
-| a / b | 8 ns | 3 ns |
-| -a | 1 ns | 1 ns |
-| a < b | 1 ns | 2 ns |
-| a == b | 1 ns | 1 ns |
-| abs(-a) | 1 ns | 2 ns |
-| inv(a) | 1 ns | 2 ns |
-| a ^ 3 | 21 ns | 7 ns |
-| a+b+c+d | 72 ns | 8 ns |
-| a*b-c*d | 41 ns | 5 ns |
-| muladd(a,b,a) | 27 ns | 6 ns |
-| fma(a,b,a) | 27 ns | 859 ns |
+| Operation | Rational{Int32} | Qx32 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 13 ns | 2 ns | 7.0x |
+| `a * b` | 8 ns | 2 ns | 4.2x |
+| `a / b` | 7 ns | 2 ns | 3.6x |
+| `muladd(a,b,a)` | 25 ns | 3 ns | 7.5x |
+| `a+b+c+d` | 66 ns | 5 ns | 14.3x |
+| `a*b-c*d` | 40 ns | 4 ns | 10.1x |
 
-### Qx64 vs Rational{Int64} Speedup
+### Qx64 vs Rational{Int64}
 
-`Qx64` delays GCD normalization until display, hashing, or conversion, giving IEEE-like Inf/NaN semantics and faster arithmetic than stdlib.
+| Operation | Rational{Int64} | Qx64 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 14 ns | 3 ns | 5.3x |
+| `a * b` | 9 ns | 2 ns | 4.0x |
+| `a / b` | 8 ns | 3 ns | 3.2x |
+| `muladd(a,b,a)` | 28 ns | 6 ns | 4.6x |
+| `a+b+c+d` | 72 ns | 8 ns | 9.4x |
+| `a*b-c*d` | 43 ns | 5 ns | 8.2x |
 
-| Operation | `Rational{Int64}` | `Qx64` | Speedup |
-| --- | --- | --- | --- |
-| construct(7,3) | 1 ns | 1 ns | ~1x |
-| a + b | 14 ns | 3 ns | 5.3x |
-| a - b | 15 ns | 3 ns | 5.5x |
-| a * b | 8 ns | 2 ns | 3.7x |
-| a / b | 8 ns | 3 ns | 3.1x |
-| -a | 1 ns | 1 ns | 1.1x |
-| a < b | 1 ns | 2 ns | 0.84x |
-| a == b | 1 ns | 1 ns | ~1x |
-| abs(-a) | 1 ns | 1 ns | 0.89x |
-| inv(a) | 2 ns | 2 ns | 0.91x |
-| a ^ 3 | 21 ns | 7 ns | 3.1x |
-| a+b+c+d | 72 ns | 8 ns | 9.4x |
-| a*b-c*d | 41 ns | 5 ns | 8.3x |
-| muladd(a,b,a) | 27 ns | 6 ns | 4.5x |
-| fma(a,b,a) | 27 ns | 859 ns | 0.03x |
+### Qx128 vs Rational{Int128}
+
+| Operation | Rational{Int128} | Qx128 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 75 ns | 7 ns | 10.4x |
+| `a * b` | 65 ns | 6 ns | 10.8x |
+| `a / b` | 60 ns | 7 ns | 8.9x |
+| `muladd(a,b,a)` | 144 ns | 12 ns | 11.7x |
+| `a+b+c+d` | 269 ns | 20 ns | 13.2x |
+| `a*b-c*d` | 216 ns | 17 ns | 12.5x |
+
+`fma` is the main exception: `Qx32`, `Qx64`, and `Qx128` compute with exact widened intermediates and then round back to the nearest representable fixed-width rational, while stdlib `Rational` just performs `muladd`. If you do not need that guarantee, `muladd` is the faster path.

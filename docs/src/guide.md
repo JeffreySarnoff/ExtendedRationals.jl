@@ -11,9 +11,7 @@ Pkg.add("XRationals")
 
 ```text
 Do you need Inf/NaN support?
-├── No  → Do you need overflow detection?
-│         ├── Yes → Rational32, Rational64, or Rational128 (internal, import from submodule)
-│         └── No  → Rational{Int32}, Rational{Int64}, or Rational{Int128} (stdlib)
+├── No  → Rational{Int32}, Rational{Int64}, or Rational{Int128} (stdlib)
 └── Yes → Qx32, Qx64, or Qx128
 ```
 
@@ -127,5 +125,49 @@ Qx64(3.14)   # best Int64 rational approximation of pi
 2. **Avoid accessing `numerator`/`denominator` in hot loops** — each call triggers normalization.
 3. **Use `muladd` instead of `fma`** unless you specifically need the exact intermediate guarantee. `muladd` is `x*y + z` with lazy normalization; `fma` must normalize first.
 4. **Qx32 is the fastest type** because Int32 intermediates use native Int64 arithmetic (single machine instruction), while Qx64 and Qx128 require progressively wider multi-word arithmetic.
-5. **Use Rational32/Rational64/Rational128** (via submodule import) when you want to detect overflow early rather than propagating Inf through a long computation.
-6. **Use Qx128 or Rational128 only when you need the extra range.** They preserve the API shape, but wider intermediates cost more than the 32- and 64-bit variants.
+5. **Use Qx128 only when you need the extra range.** It preserves the API shape, but wider intermediates cost more than the 32- and 64-bit variants.
+
+## Benchmark harness
+
+The repository ships with a runnable benchmark script:
+
+```julia
+julia --project=. test/Benchmark.jl
+```
+
+Representative local results from that harness:
+
+### Qx32 vs Rational{Int32}
+
+| Operation | Rational{Int32} | Qx32 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 13 ns | 2 ns | 7.0x |
+| `a * b` | 8 ns | 2 ns | 4.2x |
+| `a / b` | 7 ns | 2 ns | 3.6x |
+| `muladd(a,b,a)` | 25 ns | 3 ns | 7.5x |
+| `a+b+c+d` | 66 ns | 5 ns | 14.3x |
+| `a*b-c*d` | 40 ns | 4 ns | 10.1x |
+
+### Qx64 vs Rational{Int64}
+
+| Operation | Rational{Int64} | Qx64 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 14 ns | 3 ns | 5.3x |
+| `a * b` | 9 ns | 2 ns | 4.0x |
+| `a / b` | 8 ns | 3 ns | 3.2x |
+| `muladd(a,b,a)` | 28 ns | 6 ns | 4.6x |
+| `a+b+c+d` | 72 ns | 8 ns | 9.4x |
+| `a*b-c*d` | 43 ns | 5 ns | 8.2x |
+
+### Qx128 vs Rational{Int128}
+
+| Operation | Rational{Int128} | Qx128 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 75 ns | 7 ns | 10.4x |
+| `a * b` | 65 ns | 6 ns | 10.8x |
+| `a / b` | 60 ns | 7 ns | 8.9x |
+| `muladd(a,b,a)` | 144 ns | 12 ns | 11.7x |
+| `a+b+c+d` | 269 ns | 20 ns | 13.2x |
+| `a*b-c*d` | 216 ns | 17 ns | 12.5x |
+
+`fma` remains slower than stdlib `Rational` because it computes the exact widened intermediate before rounding back to the nearest fixed-width result. Use `muladd` when you want the faster lazy path.

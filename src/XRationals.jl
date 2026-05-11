@@ -2,9 +2,11 @@ module XRationals
 
 export Qx32, Qx64, Qx128
 
-import Base: convert, promote, promote_type, widen
+import Base: convert, promote_type, widen
 
-using BitIntegers: Int256
+using BitIntegers: Int256, Int512, Int1024
+
+include("support.jl")
 
 include("XRational32s.jl")
 using .XRational32s
@@ -55,7 +57,7 @@ function Qx32(x::Qx64)
         return nx > 0 ? XRational32s.posinf(Qx32) : XRational32s.neginf(Qx32)
     end
 
-    nearest = XRational32s._nearest_rational32(nx // dx)
+    nearest = _nearest_rational32(nx // dx)
     return Qx32(nearest)
 end
 
@@ -71,7 +73,7 @@ function Qx32(x::Qx128)
         return nx > 0 ? XRational32s.posinf(Qx32) : XRational32s.neginf(Qx32)
     end
 
-    nearest = XRational32s._nearest_rational32(Int256(nx) // Int256(dx))
+    nearest = _nearest_rational32(Int256(nx) // Int256(dx))
     return Qx32(nearest)
 end
 
@@ -87,7 +89,7 @@ function Qx64(x::Qx128)
         return nx > 0 ? XRational64s.posinf(Qx64) : XRational64s.neginf(Qx64)
     end
 
-    nearest = XRational64s.Rational64s._nearest_rational64(Int256(nx) // Int256(dx))
+    nearest = _nearest_rational64(Int256(nx) // Int256(dx))
     return Qx64(nearest)
 end
 

@@ -185,19 +185,46 @@ Qx32(Qx128(1, Int128(2) * Int128(typemax(Int32)) + 1))  # 0//1 (nearest Qx32)
 
 Typical speedups over `Rational{Int}` (minimum nanoseconds, zero allocations):
 
+Run the full benchmark harness with:
+
+```julia
+julia --project=. test/Benchmark.jl
+```
+
 ### Qx32 vs Rational{Int32}
 
-- `a + b`: `Rational{Int32}` 13 ns, `Qx32` 2 ns, about 6.5x faster
-- `a * b`: `Rational{Int32}` 8 ns, `Qx32` 2 ns, about 4x faster
-- `a+b+c+d`: `Rational{Int32}` 66 ns, `Qx32` 5 ns, about 13x faster
-- `a*b-c*d`: `Rational{Int32}` 37 ns, `Qx32` 4 ns, about 9x faster
+| Operation | Rational{Int32} | Qx32 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 13 ns | 2 ns | 7.0x |
+| `a * b` | 8 ns | 2 ns | 4.2x |
+| `a / b` | 7 ns | 2 ns | 3.6x |
+| `muladd(a,b,a)` | 25 ns | 3 ns | 7.5x |
+| `a+b+c+d` | 66 ns | 5 ns | 14.3x |
+| `a*b-c*d` | 40 ns | 4 ns | 10.1x |
 
 ### Qx64 vs Rational{Int64}
 
-- `a + b`: `Rational{Int64}` 14 ns, `Qx64` 3 ns, about 5x faster
-- `a * b`: `Rational{Int64}` 8 ns, `Qx64` 2 ns, about 4x faster
-- `a+b+c+d`: `Rational{Int64}` 72 ns, `Qx64` 8 ns, about 9x faster
-- `a*b-c*d`: `Rational{Int64}` 41 ns, `Qx64` 5 ns, about 8x faster
+| Operation | Rational{Int64} | Qx64 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 14 ns | 3 ns | 5.3x |
+| `a * b` | 9 ns | 2 ns | 4.0x |
+| `a / b` | 8 ns | 3 ns | 3.2x |
+| `muladd(a,b,a)` | 28 ns | 6 ns | 4.6x |
+| `a+b+c+d` | 72 ns | 8 ns | 9.4x |
+| `a*b-c*d` | 43 ns | 5 ns | 8.2x |
+
+### Qx128 vs Rational{Int128}
+
+| Operation | Rational{Int128} | Qx128 | Speedup |
+| --- | ---: | ---: | ---: |
+| `a + b` | 75 ns | 7 ns | 10.4x |
+| `a * b` | 65 ns | 6 ns | 10.8x |
+| `a / b` | 60 ns | 7 ns | 8.9x |
+| `muladd(a,b,a)` | 144 ns | 12 ns | 11.7x |
+| `a+b+c+d` | 269 ns | 20 ns | 13.2x |
+| `a*b-c*d` | 216 ns | 17 ns | 12.5x |
+
+As in the README benchmark notes, `fma` is the exception: XRationals uses exact widened intermediates and rounds back to the nearest fixed-width result, so `muladd` is the faster choice when you do not need that guarantee.
 
 ## Width summary
 

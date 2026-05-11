@@ -191,7 +191,6 @@ Base.convert(::Type{XRational128}, x::Rational{<:Integer}) = XRational128(x)
 Base.convert(::Type{Float64}, x::XRational128) = isnan(x) ? Base.NaN : isinf(x) ? (x.num > 0 ? Base.Inf : -Base.Inf) : Float64(x.num) / Float64(x.den)
 Base.convert(::Type{Float32}, x::XRational128) = isnan(x) ? Float32(Base.NaN) : isinf(x) ? (x.num > 0 ? Float32(Base.Inf) : Float32(-Base.Inf)) : Float32(x.num) / Float32(x.den)
 Base.convert(::Type{BigFloat}, x::XRational128) = isnan(x) ? BigFloat(Base.NaN) : isinf(x) ? (x.num > 0 ? BigFloat(Base.Inf) : BigFloat(-Base.Inf)) : BigFloat(x.num) / BigFloat(x.den)
-Base.convert(::Type{Rational128}, x::XRational128) = isfinite(x) ? _finite128(x) : throw(InexactError(:convert, Rational128, x))
 Base.convert(::Type{Rational{Int128}}, x::XRational128) = isfinite(x) ? (numerator(x) // denominator(x)) : throw(InexactError(:convert, Rational{Int128}, x))
 
 Base.Float32(x::XRational128) = convert(Float32, x)

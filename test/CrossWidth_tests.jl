@@ -1,5 +1,6 @@
 using XRationals
 using Test
+using BitIntegers: Int512
 
 @testset "Cross-width extended rational constructors" begin
     @test Qx32(Qx64(3, 2)) == Qx32(3, 2)
@@ -62,4 +63,10 @@ using Test
     @test Qx32(Qx128(1, 0)) == Qx32(1, 0)
     @test isnan(Qx32(Qx128(0, 0)))
     @test convert(Qx32, Qx128(7, 3)) == Qx32(7, 3)
+end
+
+@testset "Internal nearest Rational128 helper" begin
+    @test XRationals._nearest_rational128(Int512(7) // Int512(3)) == Int128(7) // Int128(3)
+    @test XRationals._nearest_rational128((Int512(typemax(Int128)) + Int512(1)) // Int512(1)) == typemax(Int128) // Int128(1)
+    @test XRationals._nearest_rational128(Int512(1) // (Int512(2) * Int512(typemax(Int128)) + Int512(1))) == Int128(0) // Int128(1)
 end
