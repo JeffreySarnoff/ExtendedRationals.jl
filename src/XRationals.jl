@@ -84,8 +84,8 @@ function Qx32(x::Qx64)
     special = _qx32_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int128(typemax(Int32)) * Int128(dx)
     magnitude = abs(Int128(nx))
     if magnitude > limit
@@ -100,8 +100,8 @@ function Qx32(x::Qx128)
     special = _qx32_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int256(typemax(Int32)) * Int256(dx)
     magnitude = abs(Int256(nx))
     if magnitude > limit
@@ -116,8 +116,8 @@ function Qx32(x::Qx256)
     special = _qx32_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int512(typemax(Int32)) * Int512(dx)
     magnitude = abs(Int512(nx))
     if magnitude > limit
@@ -132,8 +132,8 @@ function Qx32(x::Qx512)
     special = _qx32_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int1024(typemax(Int32)) * Int1024(dx)
     magnitude = abs(Int1024(nx))
     if magnitude > limit
@@ -148,8 +148,8 @@ function Qx64(x::Qx128)
     special = _qx64_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int256(typemax(Int64)) * Int256(dx)
     magnitude = abs(Int256(nx))
     if magnitude > limit
@@ -164,8 +164,8 @@ function Qx64(x::Qx256)
     special = _qx64_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int512(typemax(Int64)) * Int512(dx)
     magnitude = abs(Int512(nx))
     if magnitude > limit
@@ -180,8 +180,8 @@ function Qx64(x::Qx512)
     special = _qx64_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int1024(typemax(Int64)) * Int1024(dx)
     magnitude = abs(Int1024(nx))
     if magnitude > limit
@@ -196,8 +196,8 @@ function Qx128(x::Qx256)
     special = _qx128_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int512(typemax(Int128)) * Int512(dx)
     magnitude = abs(Int512(nx))
     if magnitude > limit
@@ -212,8 +212,8 @@ function Qx128(x::Qx512)
     special = _qx128_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int1024(typemax(Int128)) * Int1024(dx)
     magnitude = abs(Int1024(nx))
     if magnitude > limit
@@ -228,8 +228,8 @@ function Qx256(x::Qx512)
     special = _qx256_special(x)
     special !== nothing && return special
 
-    nx = numerator(x)
-    dx = denominator(x)
+    nx = x.num
+    dx = x.den
     limit = Int1024(typemax(Int256)) * Int1024(dx)
     magnitude = abs(Int1024(nx))
     if magnitude > limit
