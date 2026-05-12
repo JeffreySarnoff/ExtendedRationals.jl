@@ -9,7 +9,7 @@ Saved: 2026-05-11
 The first production performance pass is also complete:
 
 - the finite-to-`Rational` bridge optimization has been promoted into all five production width modules under `src/`
-- a second non-production prototype now exists in `src2/` for wide-to-narrow conversion improvements
+- the wide-to-narrow conversion optimization has also been promoted into `src/XRationals.jl`
 
 Completed in code:
 
@@ -29,10 +29,18 @@ Completed in code:
   - `src/XRational128s.jl`
   - `src/XRational256s.jl`
   - `src/XRational512s.jl`
-- added `src2/FiniteBridgeOptimized.jl`
-- added `src2/bench_finite_bridge.jl`
-- added `src2/WideToNarrowOptimized.jl`
-- added `src2/bench_wide_to_narrow.jl`
+- promoted the raw-field narrowing path into `src/XRationals.jl` for:
+  - `Qx64 -> Qx32`
+  - `Qx128 -> Qx32`
+  - `Qx256 -> Qx32`
+  - `Qx512 -> Qx32`
+  - `Qx128 -> Qx64`
+  - `Qx256 -> Qx64`
+  - `Qx512 -> Qx64`
+  - `Qx256 -> Qx128`
+  - `Qx512 -> Qx128`
+  - `Qx512 -> Qx256`
+- removed the temporary `src2/` prototypes after promotion
 
 ## Validation completed
 
@@ -50,6 +58,8 @@ Completed in code:
   - `julia --project=. test/runtests.jl`
 - docs build passed:
   - `julia --project=docs docs/make.jl`
+- full test suite passed again after the wide-to-narrow promotion:
+  - `julia --project=. test/runtests.jl`
 
 ## Representative local 512-bit benchmark results
 
@@ -90,9 +100,9 @@ Comparative benchmark after promotion (`src` vs `src2` prototype):
 
 ## Wide-to-narrow review
 
-The public narrowing constructors in `src/XRationals.jl` still normalize via `numerator(x)` / `denominator(x)` before entering the nearest-rational helpers. A `src2` prototype was added to measure the impact of using raw fields directly.
+The public narrowing constructors in `src/XRationals.jl` no longer normalize via `numerator(x)` / `denominator(x)` before entering the nearest-rational helpers. They now use raw `num` / `den` fields directly for the special-value check, range check, and helper input construction.
 
-Representative results from `src2/bench_wide_to_narrow.jl`:
+Pre-promotion benchmark results that justified the change were:
 
 | Conversion | Current src | src2 | Speedup |
 | --- | ---: | ---: | ---: |
@@ -108,8 +118,21 @@ Representative results from `src2/bench_wide_to_narrow.jl`:
 Status:
 
 - benchmarked and confirmed as a real candidate
-- implemented only in `src2/` so far
-- not yet promoted into production `src/`
+- promoted into production `src/`
+- `src2/` prototypes removed after promotion
+
+Post-promotion parity benchmark (`src` vs former `src2` behavior) showed the production path now matches the optimized implementation:
+
+| Conversion | Current src | Former src2 | Result |
+| --- | ---: | ---: | ---: |
+| `Qx64 -> Qx32` exact-ish | 10.7 ns | 10.6 ns | parity |
+| `Qx256 -> Qx32` approx | 259.2 ns | 258.6 ns | parity |
+| `Qx512 -> Qx32` approx | 587.0 ns | 584.1 ns | parity |
+| `Qx256 -> Qx64` approx | 431.3 ns | 430.6 ns | parity |
+| `Qx512 -> Qx64` approx | 1.0 us | 1.0 us | parity |
+| `Qx256 -> Qx128` approx | 1.9 us | 1.9 us | parity |
+| `Qx512 -> Qx128` approx | 1.9 us | 1.9 us | parity |
+| `Qx512 -> Qx256` approx | 11.4 us | 11.4 us | parity |
 
 ## Notes
 
@@ -119,3 +142,4 @@ Status:
   - 3 uncaptured type docstrings (`XRational32`, `XRational64`, `XRational128`)
   - navbar repo-link warning
   - deployment-environment warning
+- The docs build has not been rerun after the wide-to-narrow promotion because that change only touched runtime conversion logic in `src/XRationals.jl`; the last docs build remained clean at the existing warning baseline.
