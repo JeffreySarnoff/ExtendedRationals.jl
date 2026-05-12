@@ -146,7 +146,7 @@ end
     return _from_raw256(Int256(n), Int256(d))
 end
 
-@inline _finite256(x::XRational256) = Rational256(numerator(x), denominator(x))
+@inline _finite256(x::XRational256) = Rational256(x.num, x.den)
 
 #===
 Display — normalizes before printing
@@ -174,7 +174,7 @@ Base.convert(::Type{XRational256}, x::Rational{<:Integer}) = XRational256(x)
 Base.convert(::Type{Float64}, x::XRational256) = isnan(x) ? Base.NaN : isinf(x) ? (x.num > 0 ? Base.Inf : -Base.Inf) : Float64(x.num) / Float64(x.den)
 Base.convert(::Type{Float32}, x::XRational256) = isnan(x) ? Float32(Base.NaN) : isinf(x) ? (x.num > 0 ? Float32(Base.Inf) : Float32(-Base.Inf)) : Float32(x.num) / Float32(x.den)
 Base.convert(::Type{BigFloat}, x::XRational256) = isnan(x) ? BigFloat(Base.NaN) : isinf(x) ? (x.num > 0 ? BigFloat(Base.Inf) : BigFloat(-Base.Inf)) : BigFloat(x.num) / BigFloat(x.den)
-Base.convert(::Type{Rational{Int256}}, x::XRational256) = isfinite(x) ? (numerator(x) // denominator(x)) : throw(InexactError(:convert, Rational{Int256}, x))
+Base.convert(::Type{Rational{Int256}}, x::XRational256) = isfinite(x) ? Rational256(x.num, x.den) : throw(InexactError(:convert, Rational{Int256}, x))
 
 Base.Float32(x::XRational256) = convert(Float32, x)
 Base.Float64(x::XRational256) = convert(Float64, x)

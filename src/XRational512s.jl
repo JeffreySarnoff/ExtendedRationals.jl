@@ -146,7 +146,7 @@ end
     return _from_raw512(Int512(n), Int512(d))
 end
 
-@inline _finite512(x::XRational512) = Rational512(numerator(x), denominator(x))
+@inline _finite512(x::XRational512) = Rational512(x.num, x.den)
 
 #===
 Display — normalizes before printing
@@ -174,7 +174,7 @@ Base.convert(::Type{XRational512}, x::Rational{<:Integer}) = XRational512(x)
 Base.convert(::Type{Float64}, x::XRational512) = isnan(x) ? Base.NaN : isinf(x) ? (x.num > 0 ? Base.Inf : -Base.Inf) : Float64(x.num) / Float64(x.den)
 Base.convert(::Type{Float32}, x::XRational512) = isnan(x) ? Float32(Base.NaN) : isinf(x) ? (x.num > 0 ? Float32(Base.Inf) : Float32(-Base.Inf)) : Float32(x.num) / Float32(x.den)
 Base.convert(::Type{BigFloat}, x::XRational512) = isnan(x) ? BigFloat(Base.NaN) : isinf(x) ? (x.num > 0 ? BigFloat(Base.Inf) : BigFloat(-Base.Inf)) : BigFloat(x.num) / BigFloat(x.den)
-Base.convert(::Type{Rational{Int512}}, x::XRational512) = isfinite(x) ? (numerator(x) // denominator(x)) : throw(InexactError(:convert, Rational{Int512}, x))
+Base.convert(::Type{Rational{Int512}}, x::XRational512) = isfinite(x) ? Rational512(x.num, x.den) : throw(InexactError(:convert, Rational{Int512}, x))
 
 Base.Float32(x::XRational512) = convert(Float32, x)
 Base.Float64(x::XRational512) = convert(Float64, x)
